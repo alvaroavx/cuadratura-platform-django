@@ -12,6 +12,7 @@
 | Recibir datos de Plataforma Elemental por archivo | [arquitectura § Recepción Elemental v1](architecture.md#recepción-elemental-v1), [contrato y ejemplo](contracts/), `imports/elemental_v1.py`, `imports/tests/test_elemental_v1.py` |
 | Modificar cierre o exportación | [libro mensual](monthly-book.md), `reports/`, `static/js/receipt-export.js`, `audit/` y pruebas de reportes |
 | Revisar pagos de alumnos vinculados y honorarios pendientes | [importación de Finanzas Elementos](finanzas-elementos-import.md) |
+| Importar documentos tributarios del RCV del SII (comando `importar_rcv`) | [importación RCV](importacion-rcv-sii.md), [ADR 0009](adr/0009-documentos-tributarios-rcv.md), `documents/rcv.py`, `documents/rcv_import.py`, `documents/test_rcv.py` |
 | Consulta de contribuyentes por RUT (Tupana) | [ADR 0007](adr/0007-consulta-contribuyentes-rut.md), [integración Tupana](integrations/tupana.md), `organizations/contributor_info.py`, `organizations/rut.py`, `organizations/test_contributor_lookup.py` |
 | Evaluar integraciones futuras (SII, DTE, bancos, recaudación) | [hoja de ruta Tupana](roadmap/tupana-integrations.md) |
 | Preparar ejecución local | [README raíz](../README.md), `.env.example`, `compose.yaml`, `config/settings.py` |
@@ -26,11 +27,12 @@ Monolito modular Django server-rendered con PostgreSQL. Las vistas obtienen orga
 - `security.md`: aislamiento tenant, auditoría, límites de carga, admin de Django y secretos.
 - `monthly-book.md`: contrato y límites de exportación/cierre mensual y exportación interactiva de boletas.
 - `finanzas-elementos-import.md`: carga puntual de pagos de alumnos y qué parte quedó versionada.
+- `importacion-rcv-sii.md`: comando interno que registra facturas y notas de compras y ventas desde CSV del RCV, con idempotencia, notas de crédito y conciliación con resúmenes.
 - `ui-direction.md`: tokens y criterios visuales (coinciden con `static/css/app.css`).
 - `contracts/`: esquema JSON y ejemplo ficticio de `elemental-cuadratura-v1` (copia idéntica a la del workspace padre). El esquema genérico de la API vive en `integrations/contracts/` porque la API lo sirve.
 - `api-v1.md`: cómo dar de alta un cliente, firmar requests, enviar lotes, leer el acuse y los errores.
 - `seguridad-produccion.md`: checklist con evidencia para QA, producción y la futura integración SII.
-- `adr/`: decisiones sobre monolito, SII, integraciones, importación versionada, seguridad de la API y eliminación de contribuyentes como archivado (ADR-0008); cada ADR termina con una verificación contra el código.
+- `adr/`: decisiones sobre monolito, SII, integraciones, importación versionada, seguridad de la API, eliminación de contribuyentes como archivado (ADR-0008) y documentos tributarios del RCV como registro inmutable (ADR-0009); cada ADR termina con una verificación contra el código.
 
 ## Límites y precauciones
 

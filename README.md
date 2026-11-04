@@ -24,6 +24,7 @@ Contiene un monolito Django server-rendered, PostgreSQL, aplicaciones de cuentas
 - Revisar, copiar y descargar en XLSX las boletas aceptadas del período (**Exportar a Excel**).
 - Consultar los últimos 200 eventos de auditoría de la organización (roles de cierre).
 - Cerrar y reabrir períodos con trazabilidad y auditoría append-only.
+- Registrar facturas y notas de crédito/débito de compras y ventas desde los CSV del Registro de Compras y Ventas del SII con el comando interno `importar_rcv` (simula por defecto, idempotente, concilia con los resúmenes). No crea ventas ni pagos. Ver [importación RCV](docs/importacion-rcv-sii.md) y [ADR 0009](docs/adr/0009-documentos-tributarios-rcv.md).
 - Mantener un límite explícito para SII: el gateway falla de forma cerrada y no emite documentos reales.
 
 ### Trazabilidad humana
@@ -45,6 +46,8 @@ También está montado el admin de Django en `/admin/`, que registra todos los m
 - `set_api_client_public_key`: registra la llave pública de firma.
 - `link_api_client_organization`: habilita o deshabilita una organización para el cliente.
 - `purge_api_security_records`: aplica la retención.
+
+Comando propio de `documents`: `importar_rcv`, que importa documentos tributarios desde CSV del RCV del SII ([guía](docs/importacion-rcv-sii.md)).
 
 Todos auditan sus cambios.
 
@@ -111,7 +114,7 @@ Estado verificado el 2026-10-12 (API v1 con seguridad ADR 0006): `check` y `make
 
 - `accounts`: `User` UUID y rol global de plataforma.
 - `organizations`: contribuyentes, membresías e invitaciones.
-- `sales`, `payments`, `documents`: captura, dinero, DTE 39/41 y estados.
+- `sales`, `payments`, `documents`: captura, dinero, DTE 39/41 y estados. `documents.TaxDocument` guarda los documentos tributarios informados en el RCV (ADR 0009).
 - `payments`: además de `Payment`, `payments.services.register_historical_receipt_payment` vincula un pago histórico a una boleta aceptada; no tiene vista, comando ni prueba en el repositorio.
 - `reports`: exportación XLSX provisional, exportación interactiva de boletas, cierre, reapertura y vista de auditoría. El panel mensual vive en `sales`.
 - `imports`: parsers XLSX/CSV versionados, receptor JSON `elemental-cuadratura-v1` (`imports/elemental_v1.py`), lotes privados, previsualización y confirmación.

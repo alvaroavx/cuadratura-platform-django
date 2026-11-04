@@ -17,6 +17,10 @@ Cuadratura es un monolito modular. Las vistas resuelven la organización desde e
 - Una fila histórica crea `Sale + SaleLine + ElectronicReceipt` aceptada, nunca `Payment`, y usa `MISSING_PAYMENT_DATA` hasta completar datos reales del pago. Tanto CSV como XLSX guardan la venta con `origin_system=CASHBOOK_CSV_V1` y la huella de la fila como `external_id`; el RUT emisor histórico se guarda en `ElectronicReceipt.signer_name`.
 - `payments.services.register_historical_receipt_payment` puede agregar después un `Payment` a una boleta aceptada si el monto coincide exactamente, y deja la venta `RECONCILED`. Es idempotente para un pago idéntico y registra `payment.historical_matched`. No tiene vista, comando ni pruebas en el repositorio; se usó para la carga descrita en [finanzas-elementos-import.md](finanzas-elementos-import.md).
 
+## Documentos tributarios del RCV
+
+`documents.TaxDocument` registra facturas (33, 34), notas de débito (56) y de crédito (61) de compras y ventas informadas por el SII en el RCV. Se cargan con el comando `importar_rcv` (`documents/rcv.py` lee y valida; `documents/rcv_import.py` planifica y aplica). Es un registro documental: no crea `Sale`, `Payment` ni `ElectronicReceipt`, no entra al libro ni al cierre, pero un período `CLOSED` bloquea la importación. Clave natural única por contribuyente, dirección, tipo, RUT emisor y folio; un trigger impide modificar o eliminar, salvo completar la referencia de una nota. Detalle en [ADR 0009](adr/0009-documentos-tributarios-rcv.md) y la [guía](importacion-rcv-sii.md).
+
 ## Estados
 
 Se modelaron literalmente los estados solicitados para venta, boleta, conciliación y período. `validate_transition` (`sales/services.py`) define grafos explícitos, pero hoy solo lo ejercitan las pruebas: los servicios asignan estados directamente. `MonthlyClose` usa en la práctica solo `CLOSED` y `REOPENED`; `OPEN`, `HAS_EXCEPTIONS` y `READY_TO_CLOSE` existen en el modelo sin flujo que los asigne. En el futuro, un timeout desde `SUBMITTING` solo puede pasar a `UNCERTAIN`; desde allí se consulta antes de aceptar o rechazar y no se reserva/emite otro folio.

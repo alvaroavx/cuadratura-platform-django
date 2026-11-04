@@ -11,7 +11,7 @@ Lee `README.md`, `docs/README.md`, `docs/architecture.md`, `docs/security.md`, `
 ## Directorios importantes
 
 - `organizations/`: tenants, membresías y autorización por organización.
-- `sales/`, `payments/`, `documents/`: operación financiera, DTE y conciliación.
+- `sales/`, `payments/`, `documents/`: operación financiera, DTE y conciliación. `documents/` también guarda los documentos del RCV del SII (`TaxDocument`, comando `importar_rcv`, ADR-0009); son inmutables por trigger y no crean ventas ni pagos.
 - `imports/`: preview/commit de XLSX/CSV histórico y JSON `elemental-cuadratura-v1`, más archivo privado. El contrato está en `docs/contracts/`; las diferencias entre esquema y validación real, en `docs/architecture.md`.
 - `reports/`: libro provisional, exportación de boletas, cierre, reapertura y vista de auditoría.
 - `integrations/`: API HTTP v1 (`/api/v1/`), clientes técnicos con token y contrato genérico `cuadratura-operations-v1` (ADR-0005, guía `docs/api-v1.md`) con seguridad de dos factores, intentos fallidos y límites (ADR-0006, checklist `docs/seguridad-produccion.md`). La API crea lotes en preview; nunca confirma. No relajes estos controles sin un ADR.
