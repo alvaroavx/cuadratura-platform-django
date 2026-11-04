@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 {% block title %}{% if reopen %}Reabrir{% else %}Cerrar{% endif %} período · Cuadratura{% endblock %}
-{% block breadcrumb %}<li><span>{{ organization.legal_name }}</span></li><li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ period|date:"m/Y" }}</a></li><li aria-current="page"><span>{% if reopen %}Reabrir{% else %}Cerrar{% endif %} período</span></li>{% endblock %}
-{% block content %}<div class="page-heading"><div><h1>{% if reopen %}Reabrir{% else %}Cerrar{% endif %} período {{ period|date:"m/Y" }}</h1>{% if not reopen %}<p>Retención y PPM son valores mensuales manuales, no cálculos derivados de boletas.</p>{% else %}<p>La reapertura requiere un motivo y quedará registrada en auditoría.</p>{% endif %}</div></div>{% include "core/form_errors.html" %}<form method="post" class="form-card sensitive">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button class="button button-primary" type="submit">Confirmar</button><a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Volver</a></div></form>{% endblock %}
-
+{% block breadcrumb %}<li><a href="{% if period %}{% url 'organization-period' organization.id period|date:'Y-m' %}{% else %}{% url 'organization-period-current' organization.id %}{% endif %}">{{ organization.legal_name }}</a></li><li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ period|date:"m/Y" }}</a></li><li aria-current="page"><span>{% if reopen %}Reabrir{% else %}Cerrar{% endif %} período</span></li>{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Confirmación requerida</span><h1>{% if reopen %}Reabrir{% else %}Cerrar{% endif %} {{ period|date:"F Y" }}</h1>{% if not reopen %}<p>Retención y PPM son valores mensuales manuales, no cálculos derivados de boletas.</p>{% endif %}</div></div>
+<div class="danger-summary">
+  <h2>Qué ocurrirá</h2>
+  <ul>
+  {% if reopen %}
+    <li>El período se reabre de inmediato y vuelve a permitir registrar operaciones e importar archivos.</li>
+    <li>El cierre anterior y su libro se conservan; un nuevo cierre generará otra versión.</li>
+    <li>El motivo queda registrado en la auditoría.</li>
+  {% else %}
+    <li>Se genera el libro del período en Excel, versionado y con su huella SHA-256.</li>
+    <li>No se podrán registrar operaciones ni importar archivos en {{ period|date:"F Y" }}.</li>
+    <li>Si alguna operación no está conciliada, el cierre se rechazará. <a href="{% url 'organization-period' organization.id period|date:'Y-m' %}#operaciones">Revisar operaciones</a></li>
+    <li>Para corregir después habrá que reabrir el período indicando un motivo, que queda en auditoría.</li>
+  {% endif %}
+  </ul>
+</div>
+{% include "core/form_errors.html" %}
+<form method="post" class="form-card sensitive">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button class="button button-primary" type="submit">{% if reopen %}Reabrir {{ period|date:"F Y" }}{% else %}Cerrar {{ period|date:"F Y" }}{% endif %}</button><a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Volver</a></div></form>
+{% endblock %}

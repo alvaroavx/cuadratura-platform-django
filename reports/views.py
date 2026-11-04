@@ -79,7 +79,7 @@ def close_period(request,organization_id,period):
     if request.method=="POST" and form.is_valid():
         try: close=close_month(organization=org,period=month,actor=request.user,withholding=form.cleaned_data["second_category_withholding"],ppm=form.cleaned_data["ppm"])
         except ValidationError as exc: form.add_error(None,exc)
-        else: messages.success(request,f"Período cerrado. SHA-256: {close.file_hash}"); return redirect("organization-period",organization_id=org.id,period=period)
+        else: messages.success(request,f"Período cerrado. Libro versión {close.version}, huella {close.file_hash[:12]}…"); return redirect("organization-period",organization_id=org.id,period=period)
     return render(request,"reports/close_form.html",{"form":form,"organization":org,"period":month})
 
 @login_required
@@ -95,4 +95,7 @@ def reopen_period(request,organization_id,period,close_id):
 @login_required
 def audit_list(request,organization_id):
     org=authorized_organization(request.user,organization_id,roles=CLOSE_ROLES)
-    return render(request,"reports/audit.html",{"organization":org,"period":date.today().replace(day=1),"events":AuditEvent.objects.filter(organization=org).select_related("actor")[:200]})
+    # Conserva el período desde el que se llegó (?period=AAAA-MM); si falta o es inválido, el mes actual.
+    try: period=date.fromisoformat(request.GET.get("period","")+"-01")
+    except ValueError: period=date.today().replace(day=1)
+    return render(request,"reports/audit.html",{"organization":org,"period":period,"events":AuditEvent.objects.filter(organization=org).select_related("actor")[:200]})

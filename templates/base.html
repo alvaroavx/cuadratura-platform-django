@@ -4,16 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{% block title %}Cuadratura{% endblock %}</title>
-  <link rel="icon" type="image/png" href="{% static 'brand/cuadratura-logo.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'brand/cuadratura-logo.png' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-archivo2">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'brand/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'brand/favicon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261104-logo3">
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   {% organization_access user organization as access %}
   <header class="topbar">
     <a class="brand" href="{% url 'organization-list' %}" aria-label="Cuadratura, inicio">
-      <img class="brand-logo" src="{% static 'brand/cuadratura-logo.png' %}" alt="" width="42" height="42">
+      <img class="brand-mark" src="{% static 'brand/cuadratura-mark-white.png' %}" alt="" width="34" height="34">
       <span>Cuadratura</span>
     </a>
     {% if user.is_authenticated %}
@@ -46,10 +47,10 @@
     {% if organization and period %}<aside class="sidebar">{% include "core/local_nav.html" %}</aside>{% endif %}
     <div class="content-column">
       <nav class="breadcrumb" aria-label="Ruta de navegación">
-        <ol><li><a href="{% url 'organization-list' %}">Mis organizaciones</a></li>{% block breadcrumb %}{% endblock %}</ol>
+        <ol>{% block breadcrumb_root %}<li><a href="{% url 'organization-list' %}">Mis organizaciones</a></li>{% endblock %}{% block breadcrumb %}{% endblock %}</ol>
       </nav>
       <main id="contenido" tabindex="-1">
-        {% for message in messages %}<div class="notice notice-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>{% endfor %}
+        {% for message in messages %}<div class="notice notice-{{ message.tags|default:'info' }}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">{{ message }}</div>{% endfor %}
         {% block content %}{% endblock %}
       </main>
     </div>
@@ -58,6 +59,24 @@
     document.querySelectorAll('form.sensitive').forEach((form) => form.addEventListener('submit', () => {
       form.querySelectorAll('button[type=submit]').forEach((button) => { button.disabled = true; button.textContent = 'Procesando…'; });
     }));
+    // Tablas con desplazamiento horizontal: región enfocable con nombre e indicio visible.
+    const markScrollableTables = () => document.querySelectorAll('.table-wrap').forEach((wrap) => {
+      const scrollable = wrap.scrollWidth > wrap.clientWidth + 1;
+      wrap.classList.toggle('is-scrollable', scrollable);
+      let hint = wrap.previousElementSibling;
+      if (!hint || !hint.classList.contains('table-scroll-hint')) {
+        hint = document.createElement('p'); hint.className = 'table-scroll-hint'; hint.textContent = 'Desliza la tabla para ver más columnas →';
+        wrap.before(hint);
+      }
+      hint.classList.toggle('is-visible', scrollable);
+      if (scrollable) {
+        const heading = wrap.closest('section')?.querySelector('h2');
+        wrap.setAttribute('tabindex', '0'); wrap.setAttribute('role', 'region');
+        wrap.setAttribute('aria-label', heading ? `Tabla: ${heading.textContent.trim()}` : 'Tabla desplazable');
+      } else { wrap.removeAttribute('tabindex'); wrap.removeAttribute('role'); wrap.removeAttribute('aria-label'); }
+    });
+    markScrollableTables();
+    window.addEventListener('resize', () => { clearTimeout(window.__tableTimer); window.__tableTimer = setTimeout(markScrollableTables, 150); });
   </script>
   {% block scripts %}{% endblock %}
 </body>

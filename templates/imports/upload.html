@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Importar libro de caja · Cuadratura{% endblock %}
-{% block breadcrumb %}<li><span>{{ organization.legal_name }}</span></li><li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ period|date:"m/Y" }}</a></li><li aria-current="page"><span>Importar libro de caja</span></li>{% endblock %}
+{% block breadcrumb %}<li><a href="{% if period %}{% url 'organization-period' organization.id period|date:'Y-m' %}{% else %}{% url 'organization-period-current' organization.id %}{% endif %}">{{ organization.legal_name }}</a></li><li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ period|date:"m/Y" }}</a></li><li aria-current="page"><span>Importar libro de caja</span></li>{% endblock %}
 {% block content %}
 <div class="page-heading"><div><span class="eyebrow">Importación</span><h1>Validar y previsualizar</h1><p>Puede cargar el JSON de Elemental, la planilla XLSX o el CSV histórico. La validación no crea ventas, pagos ni boletas.</p></div><a class="button button-secondary" href="{% url 'provisional-export' organization.id period|date:'Y-m' %}">Descargar planilla del período</a></div>
 {% if closed %}<div class="notice notice-error" role="alert"><strong>Período cerrado.</strong> Debe reabrirse mediante el flujo autorizado antes de importar.</div>{% endif %}
