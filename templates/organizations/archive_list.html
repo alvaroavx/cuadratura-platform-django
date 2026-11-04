@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Archivo de contribuyentes · Cuadratura{% endblock %}
+{% block breadcrumb %}<li aria-current="page"><span>Archivo</span></li>{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Solo lectura</span><h1>Archivo de contribuyentes</h1><p>Contribuyentes eliminados. Su historial se conserva por auditoría; nadie puede operar en ellos.</p></div></div>
+{% if archived %}
+<div class="table-wrap">
+  <table>
+    <caption class="visually-hidden">Contribuyentes eliminados, del más reciente al más antiguo</caption>
+    <thead><tr><th scope="col">Contribuyente</th><th scope="col">Eliminado</th><th scope="col">Motivo</th><th scope="col">Datos conservados</th></tr></thead>
+    <tbody>
+    {% for org in archived %}
+      <tr>
+        <th scope="row"><strong>{{ org.legal_name }}</strong><br><span class="context-rut">RUT {{ org.tax_id }}</span></th>
+        <td>{{ org.archived_at|date:"d-m-Y H:i" }}<br><span class="context-rut">por {{ org.archived_by.get_full_name|default:org.archived_by.username|default:"—" }}</span></td>
+        <td>{{ org.archive_reason|default:"—" }}</td>
+        <td>{% for label, count in org.preserved.items %}{{ count }} {{ label }}{% if not forloop.last %} · {% endif %}{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><strong>No hay contribuyentes eliminados.</strong><span>Los contribuyentes que elimines aparecerán aquí.</span></div>
+{% endif %}
+<p class="archive-back"><a href="{% url 'organization-list' %}">Volver a Mis organizaciones</a></p>
+{% endblock %}

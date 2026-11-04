@@ -3,17 +3,28 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from accounts.models import User
 from django.views.decorators.http import require_http_methods
 from audit.services import record_event
 from .access import ADMIN_ROLES, authorized_organization, scoped_organizations
-from .forms import ControlledUserForm, InvitationForm, MembershipForm, OrganizationForm
-from .models import OrganizationMembership
+from .forms import ArchiveOrganizationForm, ControlledUserForm, InvitationForm, MembershipForm, OrganizationForm
+from .models import OrganizationMembership, TaxpayerOrganization
 
 @login_required
 def organization_list(request):
-    return render(request,"organizations/list.html",{"organizations":scoped_organizations(request.user).order_by("legal_name"),"can_create":request.user.is_platform_admin})
+    archived_count=TaxpayerOrganization.objects.filter(archived_at__isnull=False).count() if request.user.is_platform_admin else 0
+    return render(request,"organizations/list.html",{"organizations":scoped_organizations(request.user).order_by("legal_name"),"can_create":request.user.is_platform_admin,"archived_count":archived_count})
+
+@login_required
+def organization_archive_list(request):
+    """Archivo de contribuyentes eliminados: solo lectura, solo administradores de plataforma (ADR 0008)."""
+    if not request.user.is_platform_admin: raise PermissionDenied
+    archived=list(TaxpayerOrganization.objects.filter(archived_at__isnull=False).select_related("archived_by").order_by("-archived_at"))
+    for org in archived:
+        org.preserved={"ventas":org.sales.count(),"pagos":org.payments.count(),"boletas":org.receipts.count(),"cierres":org.monthly_closes.count()}
+    return render(request,"organizations/archive_list.html",{"archived":archived})
 
 @login_required
 @require_http_methods(["GET","POST"])
@@ -33,6 +44,26 @@ def organization_edit(request, organization_id):
     if request.method=="POST" and form.is_valid():
         form.save(); record_event(organization=org,actor=request.user,action="organization.updated",target=org,metadata={"active":org.is_active,"dte_39":org.dte_39_enabled,"dte_41":org.dte_41_enabled}); messages.success(request,"Contribuyente actualizado."); return redirect("organization-list")
     return render(request,"organizations/form.html",{"form":form,"organization":org,"title":"Configurar contribuyente","organization_form":True})
+
+@login_required
+@require_http_methods(["GET","POST"])
+def organization_archive(request, organization_id):
+    """Eliminación lógica: el contribuyente se oculta y bloquea, pero su historial se conserva.
+
+    El borrado físico no es posible: todas las relaciones son PROTECT y la auditoría es append-only.
+    """
+    if not request.user.is_platform_admin: raise PermissionDenied
+    org=authorized_organization(request.user,organization_id,active_only=False)
+    form=ArchiveOrganizationForm(request.POST or None,organization=org)
+    if request.method=="POST" and form.is_valid():
+        with transaction.atomic():
+            org=get_object_or_404(TaxpayerOrganization.objects.select_for_update(),pk=org.pk,archived_at__isnull=True)
+            org.archived_at=timezone.now(); org.archived_by=request.user; org.archive_reason=form.cleaned_data["reason"]; org.is_active=False
+            org.save(update_fields=["archived_at","archived_by","archive_reason","is_active","updated_at"])
+            record_event(organization=org,actor=request.user,action="organization.archived",target=org,metadata={"reason":org.archive_reason})
+        messages.success(request,f"Contribuyente {org.legal_name} eliminado. Su historial se conserva.")
+        return redirect("organization-list")
+    return render(request,"organizations/archive.html",{"form":form,"organization":org})
 
 @login_required
 @require_http_methods(["GET","POST"])

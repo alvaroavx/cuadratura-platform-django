@@ -113,7 +113,7 @@ def _organization_not_allowed(request):
 
 
 def _linked_organization(client, organization_id):
-    organization = TaxpayerOrganization.objects.filter(pk=organization_id, is_active=True).first()
+    organization = TaxpayerOrganization.objects.filter(pk=organization_id, is_active=True, archived_at__isnull=True).first()
     if organization is None or not client.organization_links.filter(
         organization=organization, is_active=True
     ).exists():

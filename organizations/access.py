@@ -9,7 +9,7 @@ IMPORT_ROLES = {OrganizationMembership.Role.ORGANIZATION_ADMIN, OrganizationMemb
 ADMIN_ROLES = {OrganizationMembership.Role.ORGANIZATION_ADMIN}
 
 def authorized_organization(user, organization_id, *, roles=None, active_only=True):
-    organization = get_object_or_404(TaxpayerOrganization, pk=organization_id)
+    organization = get_object_or_404(TaxpayerOrganization, pk=organization_id, archived_at__isnull=True)
     if active_only and not organization.is_active: raise PermissionDenied("Organización inactiva")
     if user.is_platform_admin: return organization
     allowed = roles or READ_ROLES
@@ -18,5 +18,6 @@ def authorized_organization(user, organization_id, *, roles=None, active_only=Tr
     return organization
 
 def scoped_organizations(user):
-    if user.is_platform_admin: return TaxpayerOrganization.objects.all()
-    return TaxpayerOrganization.objects.filter(memberships__user=user, memberships__is_active=True).distinct()
+    organizations = TaxpayerOrganization.objects.filter(archived_at__isnull=True)
+    if user.is_platform_admin: return organizations
+    return organizations.filter(memberships__user=user, memberships__is_active=True).distinct()

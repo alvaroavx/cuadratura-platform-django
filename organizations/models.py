@@ -10,9 +10,14 @@ class TaxpayerOrganization(models.Model):
     is_active = models.BooleanField(default=True)
     dte_39_enabled = models.BooleanField("DTE 39 declarado", default=False)
     dte_41_enabled = models.BooleanField("DTE 41 declarado", default=False)
+    archived_at = models.DateTimeField("Eliminado el", null=True, blank=True)
+    archived_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+", verbose_name="Eliminado por")
+    archive_reason = models.TextField("Motivo de eliminación", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self): return f"{self.legal_name} ({self.tax_id})"
+    @property
+    def is_archived(self): return self.archived_at is not None
 
 class OrganizationMembership(models.Model):
     class Role(models.TextChoices):

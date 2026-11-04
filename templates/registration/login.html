@@ -1,5 +1,117 @@
-{% extends "base.html" %}
-{% block title %}Ingresar · Cuadratura{% endblock %}
-{% block breadcrumb %}<li aria-current="page"><span>Ingresar</span></li>{% endblock %}
-{% block content %}<div class="page-heading"><div><span class="eyebrow">Acceso seguro</span><h1>Ingresar a Cuadratura</h1><p>Administra operaciones y documentación tributaria de tus organizaciones.</p></div></div>{% include "core/form_errors.html" %}<form method="post" class="form-card">{% csrf_token %}{{ form.as_p }}<button class="button button-primary" type="submit">Ingresar</button></form>{% endblock %}
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% if form.errors %}Error · {% endif %}Ingresar · Cuadratura</title>
+  <link rel="icon" type="image/png" href="{% static 'brand/cuadratura-logo.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'brand/cuadratura-logo.png' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261103-archivo2">
+</head>
+<body class="login-body">
+  <a class="skip-link" href="#contenido">Saltar al formulario de ingreso</a>
+  <div class="login">
+    <section class="login-identity" aria-label="Cuadratura">
+      <p class="login-wordmark">Cuadratura</p>
+      <div class="login-message">
+        <span class="login-balance-line" aria-hidden="true"></span>
+        <p class="login-motto">Cada peso, en su lugar.</p>
+        <p class="login-description">Ventas, pagos, conciliación y cierres de tus organizaciones.</p>
+      </div>
+      <svg class="login-pattern" aria-hidden="true" focusable="false" viewBox="0 0 600 360" preserveAspectRatio="xMinYMax slice">
+        <defs>
+          <pattern id="login-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M60 0H0V60" fill="none" stroke="rgb(255 255 255 / 8%)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="600" height="360" fill="url(#login-grid)"/>
+        <g fill="rgb(255 255 255 / 4%)" stroke="rgb(255 255 255 / 10%)" stroke-width="1">
+          <rect x="64" y="5" width="60" height="60"/>
+          <rect x="177" y="64" width="60" height="60"/>
+          <rect x="4" y="122" width="60" height="60"/>
+          <rect x="245" y="3" width="60" height="60"/>
+          <rect x="125" y="185" width="60" height="60"/>
+          <rect x="302" y="126" width="60" height="60"/>
+          <rect x="363" y="62" width="60" height="60"/>
+          <rect x="66" y="244" width="60" height="60"/>
+          <rect x="236" y="246" width="60" height="60"/>
+          <rect x="425" y="183" width="60" height="60"/>
+          <rect x="484" y="5" width="60" height="60"/>
+          <rect x="183" y="302" width="60" height="60"/>
+        </g>
+        <rect class="login-pattern-square" x="420" y="240" width="60" height="60"/>
+      </svg>
+    </section>
 
+    <main class="login-main" id="contenido" tabindex="-1">
+      <div class="login-panel">
+        <h1>Ingresar</h1>
+
+        {% if form.errors %}
+          <div class="login-error" role="alert" id="login-error">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            {% for field in form %}{% for error in field.errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" class="login-form" id="login-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <div class="login-field">
+            <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+            <input type="text" name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}"
+              value="{{ form.username.value|default_if_none:'' }}"
+              autocomplete="username" autocapitalize="none" spellcheck="false" required
+              maxlength="{{ form.username.field.max_length }}"
+              aria-describedby="login-username-help{% if form.errors %} login-error{% endif %}"
+              {% if form.errors %}aria-invalid="true"{% else %}autofocus{% endif %}>
+            <p class="login-help" id="login-username-help">Usa tu nombre de usuario, no tu correo.</p>
+          </div>
+
+          <div class="login-field">
+            <label for="{{ form.password.id_for_label }}">Contraseña</label>
+            <div class="login-password">
+              <input type="password" name="{{ form.password.html_name }}" id="{{ form.password.id_for_label }}"
+                autocomplete="current-password" required
+                {% if form.errors %}aria-invalid="true" aria-describedby="login-error" autofocus{% endif %}>
+              <button type="button" class="login-reveal" aria-controls="{{ form.password.id_for_label }}" aria-pressed="false" hidden>Mostrar</button>
+            </div>
+          </div>
+
+          <button class="button button-primary login-submit" type="submit">Ingresar</button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const form = document.getElementById('login-form');
+      const password = document.getElementById('{{ form.password.id_for_label }}');
+      const reveal = form.querySelector('.login-reveal');
+      const submit = form.querySelector('.login-submit');
+      reveal.hidden = false;
+      reveal.addEventListener('click', () => {
+        const show = password.type === 'password';
+        const start = password.selectionStart, end = password.selectionEnd;
+        password.type = show ? 'text' : 'password';
+        reveal.textContent = show ? 'Ocultar' : 'Mostrar';
+        reveal.setAttribute('aria-pressed', String(show));
+        password.focus();
+        try { password.setSelectionRange(start, end); } catch (e) {}
+      });
+      form.addEventListener('submit', () => {
+        password.type = 'password';
+        form.setAttribute('aria-busy', 'true');
+        submit.disabled = true;
+        submit.textContent = 'Ingresando…';
+      });
+      window.addEventListener('pageshow', () => {
+        form.removeAttribute('aria-busy');
+        submit.disabled = false;
+        submit.textContent = 'Ingresar';
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -183,6 +183,6 @@ def linked_organizations(client):
     return [
         link.organization
         for link in client.organization_links.select_related("organization").filter(
-            is_active=True, organization__is_active=True
+            is_active=True, organization__is_active=True, organization__archived_at__isnull=True
         ).order_by("organization__legal_name")
     ]

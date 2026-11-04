@@ -12,5 +12,12 @@
   {% else %}{{ form.as_p }}{% endif %}
   <div class="form-actions"><button class="button button-primary" type="submit">Guardar</button>{% if organization %}<a class="button button-tertiary" href="{% url 'organization-period-current' organization.id %}">Volver</a>{% else %}<a class="button button-tertiary" href="{% url 'organization-list' %}">Cancelar</a>{% endif %}</div>
 </form>
+{% if organization_form and organization %}
+<section class="danger-zone" aria-labelledby="danger-zone-title">
+  <h2 id="danger-zone-title">Eliminar contribuyente</h2>
+  <p>Deja de aparecer en las listas y nadie podrá trabajar en él. Su historial se conserva por auditoría.</p>
+  <a class="button button-danger" href="{% url 'organization-archive' organization.id %}">Eliminar contribuyente…</a>
+</section>
+{% endif %}
 {% endblock %}
 

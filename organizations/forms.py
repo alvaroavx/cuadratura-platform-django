@@ -25,6 +25,26 @@ class OrganizationForm(forms.ModelForm):
             "is_active":"Las personas asignadas solo pueden trabajar en contribuyentes activos.",
         }
 
+def _normalize_tax_id(value):
+    return value.replace(".", "").replace(" ", "").strip().upper()
+
+class ArchiveOrganizationForm(forms.Form):
+    reason=forms.CharField(label="Motivo", widget=forms.Textarea(attrs={"rows":3}), max_length=500,
+        help_text="Queda registrado en la auditoría del contribuyente.")
+    confirm_tax_id=forms.CharField(label="Escribe el RUT del contribuyente para confirmar", max_length=20)
+    def __init__(self, *args, organization, **kwargs):
+        super().__init__(*args, **kwargs); self.organization=organization
+        self.fields["confirm_tax_id"].help_text=f"Debe coincidir con {organization.tax_id}."
+    def clean_reason(self):
+        reason=self.cleaned_data["reason"].strip()
+        if not reason: raise forms.ValidationError("Indica el motivo.")
+        return reason
+    def clean_confirm_tax_id(self):
+        value=self.cleaned_data["confirm_tax_id"]
+        if _normalize_tax_id(value)!=_normalize_tax_id(self.organization.tax_id):
+            raise forms.ValidationError("El RUT no coincide con el del contribuyente.")
+        return value
+
 class InvitationForm(forms.ModelForm):
     class Meta:
         model=UserInvitation

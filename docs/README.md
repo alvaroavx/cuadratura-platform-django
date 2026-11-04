@@ -28,7 +28,7 @@ Monolito modular Django server-rendered con PostgreSQL. Las vistas obtienen orga
 - `contracts/`: esquema JSON y ejemplo ficticio de `elemental-cuadratura-v1` (copia idéntica a la del workspace padre). El esquema genérico de la API vive en `integrations/contracts/` porque la API lo sirve.
 - `api-v1.md`: cómo dar de alta un cliente, firmar requests, enviar lotes, leer el acuse y los errores.
 - `seguridad-produccion.md`: checklist con evidencia para QA, producción y la futura integración SII.
-- `adr/`: decisiones sobre monolito, SII, integraciones e importación versionada; cada ADR termina con una verificación contra el código.
+- `adr/`: decisiones sobre monolito, SII, integraciones, importación versionada, seguridad de la API y eliminación de contribuyentes como archivado (ADR-0008); cada ADR termina con una verificación contra el código.
 
 ## Límites y precauciones
 

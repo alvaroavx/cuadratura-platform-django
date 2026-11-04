@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{% if form.errors %}Error · {% endif %}Eliminar contribuyente · Cuadratura{% endblock %}
+{% block breadcrumb %}<li><a href="{% url 'organization-edit' organization.id %}">{{ organization.legal_name }}</a></li><li aria-current="page"><span>Eliminar contribuyente</span></li>{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Confirmación requerida</span><h1>Eliminar {{ organization.legal_name }}</h1><p>RUT {{ organization.tax_id }}</p></div></div>
+<div class="danger-summary">
+  <h2>Qué ocurrirá</h2>
+  <ul>
+    <li>El contribuyente deja de aparecer en todas las listas, incluida la tuya.</li>
+    <li>Nadie podrá entrar a su espacio de trabajo, ni siquiera administradores.</li>
+    <li>La API rechazará operaciones para este contribuyente.</li>
+    <li>Ventas, pagos, boletas, cierres y auditoría <strong>no se borran</strong>: se conservan por trazabilidad.</li>
+    <li>El RUT {{ organization.tax_id }} queda ocupado. Solo se puede restaurar desde la administración técnica.</li>
+  </ul>
+</div>
+{% include "core/form_errors.html" %}
+<form method="post" class="form-card sensitive">{% csrf_token %}
+  {% include "core/field.html" with field=form.reason %}
+  {% include "core/field.html" with field=form.confirm_tax_id %}
+  <div class="form-actions"><button class="button button-danger" type="submit">Sí, eliminar contribuyente</button><a class="button button-tertiary" href="{% url 'organization-edit' organization.id %}">Cancelar</a></div>
+</form>
+{% endblock %}
