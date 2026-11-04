@@ -1,0 +1,13 @@
+{% with activities=organization.activities.all addresses=organization.addresses.all %}
+<div class="public-data">
+  <p class="help-text">{% if organization.external_source %}Antecedentes confirmados desde {{ organization.external_source }} el {{ organization.external_synced_at|date:"d-m-Y H:i" }}. No son una validación del SII.{% else %}Sin antecedentes confirmados desde una fuente externa.{% endif %}</p>
+  <details{% if activities|length <= 5 %} open{% endif %}>
+    <summary>Actividades económicas ({{ activities|length }})</summary>
+    {% if activities %}<ul class="public-data-list">{% for activity in activities %}<li><strong>{{ activity.code }}</strong> {{ activity.name }} <small class="help-text">· {{ activity.get_source_display }}{% if activity.not_reported_since %} · no informada por la fuente desde {{ activity.not_reported_since|date:"d-m-Y" }}{% endif %}</small></li>{% endfor %}</ul>{% else %}<p class="help-text">Sin actividades registradas.</p>{% endif %}
+  </details>
+  <details{% if addresses|length <= 5 %} open{% endif %}>
+    <summary>Direcciones registradas ({{ addresses|length }})</summary>
+    {% if addresses %}<ul class="public-data-list">{% for address in addresses %}<li>{{ address }}{% if address.is_main_in_sii %} <span class="badge badge-info">Casa matriz según SII</span>{% endif %}{% if address.sii_branch_code %} · sucursal SII {{ address.sii_branch_code }}{% endif %}{% if address.phone %} · {{ address.phone }}{% endif %} <small class="help-text">· {{ address.get_source_display }}{% if address.not_reported_since %} · no informada por la fuente desde {{ address.not_reported_since|date:"d-m-Y" }}{% endif %}</small></li>{% endfor %}</ul>{% else %}<p class="help-text">Sin direcciones registradas.</p>{% endif %}
+  </details>
+</div>
+{% endwith %}

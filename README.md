@@ -15,6 +15,7 @@ Contiene un monolito Django server-rendered, PostgreSQL, aplicaciones de cuentas
 ### Funcionalidades y tareas que resuelve
 
 - Administrar usuarios, organizaciones, membresías y roles.
+- Consultar antecedentes públicos por RUT en Tupana al crear un contribuyente (vista previa y confirmación) y al editarlo («Actualizar desde Tupana», con comparación y selección campo a campo). Es opcional y está deshabilitado sin API key; ver [ADR 0007](docs/adr/0007-consulta-contribuyentes-rut.md).
 - Registrar ventas, pagos y documentos DTE 39/41 configurables.
 - Importar información histórica mediante XLSX o CSV con previsualización y confirmación atómica.
 - Importar operaciones y pagos confirmados desde Plataforma Elemental mediante un archivo JSON `elemental-cuadratura-v1`, con idempotencia por identificador externo y detección de conflictos.
@@ -56,7 +57,7 @@ La exportación es provisional. La planilla de referencia se contrastó solo en 
 - Dependencias de ejecución en `requirements.txt`: Django 5.2.x, psycopg 3, openpyxl, WhiteNoise y cryptography (firma Ed25519 de la API). `ruff` y `coverage` figuran solo como extra `dev` en `pyproject.toml` y no se instalan con `requirements.txt`.
 - opcionalmente Docker Compose para levantar solo PostgreSQL
 
-Variables de entorno leídas por `config/settings.py`: `DJANGO_SECRET_KEY` (obligatoria fuera de DEBUG), `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_DB/USER/PASSWORD/HOST/PORT`, más las de endurecimiento HTTP y de la API (`API_*`), listadas en `.env.example` y en el [checklist de producción](docs/seguridad-produccion.md). `SII_GATEWAY` se lee en settings, pero ningún código lo consume todavía.
+Variables de entorno leídas por `config/settings.py`: `DJANGO_SECRET_KEY` (obligatoria fuera de DEBUG), `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_DB/USER/PASSWORD/HOST/PORT`, más las de endurecimiento HTTP, de la API (`API_*`) y de la consulta de contribuyentes por RUT (`CONTRIBUTOR_INFO_*`, `TUPANA_API_KEY`; deshabilitada por defecto, ver [ADR 0007](docs/adr/0007-consulta-contribuyentes-rut.md) y [integración Tupana](docs/integrations/tupana.md)), listadas en `.env.example` y en el [checklist de producción](docs/seguridad-produccion.md). `SII_GATEWAY` se lee en settings, pero ningún código lo consume todavía.
 
 ## Instalación local
 

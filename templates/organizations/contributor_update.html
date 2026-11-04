@@ -1,0 +1,52 @@
+<section class="form-card rut-lookup rut-update" data-rut-update data-lookup-url="{% url 'organization-update-lookup' organization.id %}" data-main-form="organization-form" aria-labelledby="rut-update-title">
+  <h2 id="rut-update-title">Actualizar desde {{ contributor_lookup_source }}</h2>
+  <p class="help-text">Consulta en {{ contributor_lookup_source }} los antecedentes públicos del RUT {{ organization.tax_id }} y elige qué cambios aplicar. La consulta no modifica nada; el RUT no se reemplaza.</p>
+  <div class="rut-lookup-bar">
+    <button class="button button-secondary" type="button" data-lookup-button>Consultar datos</button>
+    <p class="help-text" data-lookup-status role="status" aria-live="polite"></p>
+  </div>
+  <form method="post" action="{% url 'organization-update-from-lookup' organization.id %}" class="lookup-preview sensitive" data-update-form hidden tabindex="-1" aria-labelledby="rut-update-result">
+    {% csrf_token %}
+    <input type="hidden" name="version" value="" data-version>
+    <input type="hidden" name="source" value="" data-source>
+    <input type="hidden" name="fetched_at" value="" data-fetched-at>
+    <input type="hidden" name="confirm" value="" data-confirm>
+    <input type="hidden" name="provider_reference" value="" data-provider-reference>
+    <input type="hidden" name="consulted_activities" value="" data-consulted-activities>
+    <input type="hidden" name="consulted_addresses" value="" data-consulted-addresses>
+    <input type="hidden" name="selected_activities" value="" data-selected-activities>
+    <input type="hidden" name="selected_addresses" value="" data-selected-addresses>
+    <div class="lookup-preview-heading">
+      <h3 id="rut-update-result">Comparación con los datos registrados</h3>
+      <p class="lookup-provenance" data-lookup-provenance></p>
+    </div>
+    <p class="notice" data-no-differences hidden>Sin diferencias: los datos registrados coinciden con los consultados. No hay cambios que aplicar.</p>
+    <div class="table-wrap">
+      <table class="lookup-diff">
+        <thead><tr><th scope="col">Campo</th><th scope="col">Valor actual</th><th scope="col">{{ contributor_lookup_source }}</th><th scope="col">Aplicar</th></tr></thead>
+        <tbody data-diff-body></tbody>
+      </table>
+    </div>
+    <section class="lookup-collection" data-collection="activities" hidden aria-labelledby="diff-activities-title">
+      <h4 id="diff-activities-title">Actividades económicas</h4>
+      <div class="table-wrap"><table class="lookup-diff"><thead><tr><th scope="col">Código</th><th scope="col">Valor actual</th><th scope="col">{{ contributor_lookup_source }}</th><th scope="col">Estado</th><th scope="col">Aplicar</th></tr></thead><tbody data-collection-body></tbody></table></div>
+    </section>
+    <section class="lookup-collection" data-collection="addresses" hidden aria-labelledby="diff-addresses-title">
+      <h4 id="diff-addresses-title">Direcciones registradas</h4>
+      <p class="help-text">Lo que {{ contributor_lookup_source }} no informa se marca como «no informado» y nunca se elimina. <button class="button-link" type="button" data-select-all>Marcar todas</button> · <button class="button-link" type="button" data-select-none>Desmarcar todas</button></p>
+      <p class="help-text" data-truncated hidden>El proveedor informó más direcciones de las que Cuadratura muestra.</p>
+      <div class="table-wrap lookup-choices-scroll"><table class="lookup-diff"><thead><tr><th scope="col">Dirección</th><th scope="col">Valor actual</th><th scope="col">{{ contributor_lookup_source }}</th><th scope="col">Estado</th><th scope="col">Aplicar</th></tr></thead><tbody data-collection-body></tbody></table></div>
+    </section>
+    <div class="form-actions" data-review-actions>
+      <button class="button button-primary" type="button" data-review>Revisar cambios seleccionados</button>
+      <button class="button button-tertiary" type="button" data-lookup-discard>Descartar consulta</button>
+    </div>
+    <div class="lookup-confirm" data-confirm-step hidden>
+      <p data-confirm-summary></p>
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" data-confirm-submit>Confirmar cambios</button>
+        <button class="button button-tertiary" type="button" data-confirm-back>Volver a la comparación</button>
+      </div>
+    </div>
+  </form>
+</section>

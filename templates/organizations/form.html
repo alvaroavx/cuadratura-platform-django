@@ -1,17 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ title }} · Cuadratura{% endblock %}
 {% block breadcrumb %}{% if organization %}<li><span>{{ organization.legal_name }}</span></li>{% endif %}<li aria-current="page"><span>{{ title }}</span></li>{% endblock %}
 {% block content %}
 <div class="page-heading"><div><h1>{{ title }}</h1>{% if organization_form %}<p>Información administrativa y capacidades tributarias declaradas.</p>{% endif %}</div></div>
 {% include "core/form_errors.html" %}
-<form method="post" class="form-card sensitive">{% csrf_token %}
+<form method="post" class="form-card sensitive" id="organization-form">{% csrf_token %}
   {% if organization_form %}
-    <fieldset><legend>Identificación tributaria</legend><div class="form-grid">{% include "core/field.html" with field=form.tax_id %}{% include "core/field.html" with field=form.legal_name %}{% include "core/field.html" with field=form.trade_name %}</div></fieldset>
+    {% if organization %}<input type="hidden" name="version" value="{{ organization_version }}">{% endif %}
+    <fieldset><legend>Identificación tributaria</legend><div class="form-grid">{% include "core/field.html" with field=form.tax_id %}{% include "core/field.html" with field=form.legal_name %}{% include "core/field.html" with field=form.trade_name %}{% include "core/field.html" with field=form.public_email %}</div>
+    {% if organization %}{% include "organizations/public_data.html" %}{% endif %}
+    {% if contributor_lookup_enabled and not organization %}{% include "organizations/contributor_lookup.html" %}{% endif %}</fieldset>
     <fieldset><legend>Documentos habilitados</legend><div class="choice-stack">{% include "core/choice_field.html" with field=form.dte_39_enabled %}{% include "core/choice_field.html" with field=form.dte_41_enabled %}</div></fieldset>
     <fieldset><legend>Estado del contribuyente</legend><div class="choice-stack">{% include "core/choice_field.html" with field=form.is_active %}</div></fieldset>
   {% else %}{{ form.as_p }}{% endif %}
   <div class="form-actions"><button class="button button-primary" type="submit">Guardar</button>{% if organization %}<a class="button button-tertiary" href="{% url 'organization-period-current' organization.id %}">Volver</a>{% else %}<a class="button button-tertiary" href="{% url 'organization-list' %}">Cancelar</a>{% endif %}</div>
 </form>
+{% if organization_form and organization and contributor_lookup_enabled %}{% include "organizations/contributor_update.html" %}{% endif %}
 {% if organization_form and organization %}
 <section class="danger-zone" aria-labelledby="danger-zone-title">
   <h2 id="danger-zone-title">Eliminar contribuyente</h2>
@@ -20,4 +25,4 @@
 </section>
 {% endif %}
 {% endblock %}
-
+{% block scripts %}{% if contributor_lookup_enabled and organization_form %}<script src="{% static 'js/contributor-lookup.js' %}?v=20261103-actualizar-rut" defer></script>{% endif %}{% endblock %}

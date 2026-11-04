@@ -274,6 +274,44 @@ tbody tr:hover { background: #fafcfd; }
   .export-actions .button { width: 100%; }
 }
 
+/* Consulta de contribuyente por RUT (ADR 0007) */
+.rut-lookup { margin-top: 1rem; }
+.rut-lookup-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.rut-lookup-bar .help-text { flex: 1 1 18rem; margin: 0; }
+.rut-lookup [data-tone="error"] { color: var(--danger); }
+.rut-lookup [data-tone="warning"] { color: var(--warning); }
+.rut-lookup [data-tone="success"] { color: var(--success); }
+.lookup-preview { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-left: 4px solid var(--info); border-radius: 0 var(--radius) var(--radius) 0; background: #f7fbfc; }
+.lookup-preview:focus { outline: 3px solid var(--accent); outline-offset: 3px; }
+.lookup-preview-heading h3 { margin: 0; color: var(--structural); font-size: 1.02rem; }
+.lookup-provenance { margin: .2rem 0 .6rem; color: var(--muted); font-size: .82rem; }
+.lookup-reference { margin: 1rem 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1rem; }
+.lookup-reference > p { grid-column: 1 / -1; margin: 0; }
+.lookup-reference dt { color: var(--muted); font-size: .82rem; font-weight: 680; }
+.lookup-reference dd { margin: .1rem 0 0; overflow-wrap: anywhere; white-space: pre-line; }
+.rut-update { margin-top: 2rem; }
+.rut-update h2 { margin: 0 0 .35rem; font-size: 1.12rem; color: var(--structural); }
+.lookup-diff th[scope="row"] { font-weight: 680; }
+.lookup-diff .is-different { color: var(--structural); font-weight: 650; }
+.lookup-action { margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+.lookup-action label { display: inline-flex; align-items: center; gap: .35rem; min-height: 44px; cursor: pointer; }
+.lookup-confirm { margin-top: 1rem; padding: .9rem 1rem; border-left: 4px solid var(--warning); background: #fff8eb; border-radius: 0 var(--radius) var(--radius) 0; }
+.lookup-confirm p { margin: 0 0 .5rem; }
+.lookup-collection { margin: 1rem 0 0; padding: 0; border: 0; }
+.lookup-collection legend, .lookup-collection h4 { margin: 0 0 .35rem; color: var(--structural); font-size: .98rem; font-weight: 700; }
+.lookup-choices { display: grid; gap: .35rem; }
+.lookup-choices-scroll { max-height: 22rem; overflow: auto; }
+.choice-inline { display: flex; align-items: flex-start; gap: .5rem; min-height: 44px; cursor: pointer; }
+.choice-inline input { margin-top: .3rem; }
+.button-link { padding: 0; border: 0; background: none; color: var(--action); text-decoration: underline; cursor: pointer; font: inherit; min-height: 0; }
+.public-data { margin-top: 1rem; display: grid; gap: .5rem; }
+.public-data summary { cursor: pointer; font-weight: 680; color: var(--structural); }
+.public-data-list { margin: .4rem 0 0; padding-left: 1.2rem; display: grid; gap: .25rem; }
+@media (max-width: 560px) {
+  .lookup-reference { grid-template-columns: 1fr; }
+  .rut-lookup-bar .button { width: 100%; }
+}
+
 /* Login · iteración 1: "El orden tiene una forma" */
 .login-body {
   --petroleo: var(--structural);

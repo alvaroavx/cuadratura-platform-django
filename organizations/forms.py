@@ -10,11 +10,12 @@ from accounts.models import User
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model=TaxpayerOrganization
-        fields=("tax_id","legal_name","trade_name","is_active","dte_39_enabled","dte_41_enabled")
+        fields=("tax_id","legal_name","trade_name","public_email","is_active","dte_39_enabled","dte_41_enabled")
         labels={
             "tax_id":"RUT",
             "legal_name":"Razón social",
             "trade_name":"Nombre de fantasía",
+            "public_email":"Correo de contacto público",
             "is_active":"Contribuyente activo",
             "dte_39_enabled":"DTE 39 — Boleta electrónica afecta",
             "dte_41_enabled":"DTE 41 — Boleta electrónica exenta",

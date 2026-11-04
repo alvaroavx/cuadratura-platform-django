@@ -90,6 +90,13 @@ API_TOKEN_ROTATION_GRACE_HOURS = int(os.environ.get("API_TOKEN_ROTATION_GRACE_HO
 # Encabezado que fija el proxy con la IP real (p. ej. HTTP_X_REAL_IP). Vacío: REMOTE_ADDR.
 API_CLIENT_IP_HEADER = os.environ.get("API_CLIENT_IP_HEADER", "").strip()
 
+# Consulta de contribuyentes por RUT (ADR 0007). "disabled" (por defecto) o "tupana".
+# La API key nunca se envía al navegador ni se registra en logs.
+CONTRIBUTOR_INFO_PROVIDER = os.environ.get("CONTRIBUTOR_INFO_PROVIDER", "disabled")
+TUPANA_API_KEY = os.environ.get("TUPANA_API_KEY", "")
+CONTRIBUTOR_INFO_TIMEOUT_SECONDS = float(os.environ.get("CONTRIBUTOR_INFO_TIMEOUT_SECONDS", "8"))
+CONTRIBUTOR_INFO_RATE_LIMIT_PER_MINUTE = int(os.environ.get("CONTRIBUTOR_INFO_RATE_LIMIT_PER_MINUTE", "10"))
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

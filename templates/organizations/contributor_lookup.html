@@ -1,0 +1,38 @@
+<div class="rut-lookup" data-rut-lookup data-lookup-url="{% url 'organization-tax-id-lookup' %}" data-tax-id-input="{{ form.tax_id.id_for_label }}" data-legal-name-input="{{ form.legal_name.id_for_label }}" data-trade-name-input="{{ form.trade_name.id_for_label }}" data-public-email-input="{{ form.public_email.id_for_label }}">
+  <input type="hidden" name="lookup_source" value="" data-lookup-source>
+  <input type="hidden" name="lookup_reference" value="" data-lookup-reference-id>
+  <input type="hidden" name="lookup_activities" value="" data-lookup-activities>
+  <input type="hidden" name="lookup_addresses" value="" data-lookup-addresses>
+  <div class="rut-lookup-bar">
+    <button class="button button-secondary" type="button" data-lookup-button disabled>Consultar datos</button>
+    <p class="help-text" data-lookup-status role="status" aria-live="polite">Ingresa un RUT válido para consultar sus antecedentes públicos. También puedes completar los datos a mano.</p>
+  </div>
+  <p class="help-text" data-lookup-accepted hidden></p>
+  <section class="lookup-preview" data-lookup-preview hidden aria-labelledby="lookup-preview-title" tabindex="-1">
+    <div class="lookup-preview-heading">
+      <h3 id="lookup-preview-title">Datos encontrados para <span data-lookup-rut></span></h3>
+      <p class="lookup-provenance" data-lookup-provenance></p>
+    </div>
+    <p class="help-text">Revisa y corrige antes de usarlos. Nada se guarda hasta que presiones <strong>Guardar</strong>.</p>
+    <div class="form-grid">
+      <div class="field"><label for="lookup-legal-name">Razón social</label><input id="lookup-legal-name" type="text" maxlength="200" data-preview-field="legal_name"></div>
+      <div class="field"><label for="lookup-trade-name">Nombre de fantasía</label><input id="lookup-trade-name" type="text" maxlength="200" data-preview-field="trade_name" placeholder="Sin información del proveedor"></div>
+      <div class="field"><label for="lookup-public-email">Correo de contacto público</label><input id="lookup-public-email" type="email" maxlength="254" data-preview-field="public_email" placeholder="Sin información del proveedor"></div>
+    </div>
+    <fieldset class="lookup-collection" data-preview-activities hidden>
+      <legend>Actividades económicas</legend>
+      <p class="help-text">Marca las que quieres guardar.</p>
+      <div class="lookup-choices" data-choices></div>
+    </fieldset>
+    <fieldset class="lookup-collection" data-preview-addresses hidden>
+      <legend>Direcciones registradas <span data-count></span></legend>
+      <p class="help-text">Vienen marcadas la casa matriz según SII, o todas si son pocas. <button class="button-link" type="button" data-select-all>Marcar todas</button> · <button class="button-link" type="button" data-select-none>Desmarcar todas</button></p>
+      <p class="help-text" data-truncated hidden>El proveedor informó más direcciones de las que Cuadratura muestra.</p>
+      <div class="lookup-choices lookup-choices-scroll" data-choices></div>
+    </fieldset>
+    <div class="form-actions">
+      <button class="button button-primary" type="button" data-lookup-accept>Usar estos datos</button>
+      <button class="button button-tertiary" type="button" data-lookup-discard>Descartar</button>
+    </div>
+  </section>
+</div>

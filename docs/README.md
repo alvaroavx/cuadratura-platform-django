@@ -12,6 +12,8 @@
 | Recibir datos de Plataforma Elemental por archivo | [arquitectura § Recepción Elemental v1](architecture.md#recepción-elemental-v1), [contrato y ejemplo](contracts/), `imports/elemental_v1.py`, `imports/tests/test_elemental_v1.py` |
 | Modificar cierre o exportación | [libro mensual](monthly-book.md), `reports/`, `static/js/receipt-export.js`, `audit/` y pruebas de reportes |
 | Revisar pagos de alumnos vinculados y honorarios pendientes | [importación de Finanzas Elementos](finanzas-elementos-import.md) |
+| Consulta de contribuyentes por RUT (Tupana) | [ADR 0007](adr/0007-consulta-contribuyentes-rut.md), [integración Tupana](integrations/tupana.md), `organizations/contributor_info.py`, `organizations/rut.py`, `organizations/test_contributor_lookup.py` |
+| Evaluar integraciones futuras (SII, DTE, bancos, recaudación) | [hoja de ruta Tupana](roadmap/tupana-integrations.md) |
 | Preparar ejecución local | [README raíz](../README.md), `.env.example`, `compose.yaml`, `config/settings.py` |
 
 ## Arquitectura verificable

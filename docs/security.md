@@ -18,6 +18,10 @@ Las importaciones limitan el tamaño y la cantidad de filas: CSV hasta 2 MiB y 5
 
 Nunca se deben guardar certificado, contraseña, CAF, llave privada o llave maestra en Git, logs o texto plano. La futura llave maestra vivirá en un secret manager/HSM fuera de PostgreSQL.
 
+## Consulta de contribuyentes por RUT
+
+Detalle en [ADR 0007](adr/0007-consulta-contribuyentes-rut.md). La solicitud sale solo del backend hacia una URL fija en código (Tupana), sin redirecciones y con timeout. La API key (`TUPANA_API_KEY`) viaja en la cabecera `Authorization` y nunca llega al navegador ni a los logs, que tampoco registran el RUT ni la respuesta. Los endpoints de consulta exigen sesión, administrador de plataforma, CSRF y un límite por usuario, y no escriben en la base. La aplicación de cambios en edición exige confirmación explícita, acepta solo campos permitidos (nunca el RUT), ignora valores vacíos, rechaza ediciones concurrentes (`updated_at` bajo `select_for_update`) y audita qué campos cambiaron. Las actividades y direcciones consultadas se validan en servidor, solo se agregan o actualizan si se seleccionan y nunca se eliminan. No se guarda la respuesta del proveedor. Está deshabilitado por defecto.
+
 ## API v1
 
 Diseño completo en [ADR 0006](adr/0006-seguridad-api.md); lo que falta para QA y
