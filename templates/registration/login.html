@@ -7,15 +7,15 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'brand/favicon-32.png' %}">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'brand/favicon-192.png' %}">
   <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261104-logo3">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261104-login4">
 </head>
 <body class="login-body">
   <a class="skip-link" href="#contenido">Saltar al formulario de ingreso</a>
   <div class="login">
     <section class="login-identity" aria-label="Cuadratura">
-      <p class="login-wordmark">Cuadratura</p>
       <div class="login-message">
         <span class="login-balance-line" aria-hidden="true"></span>
+        <p class="login-wordmark">Cuadratura</p>
         <p class="login-motto">Cada peso, en su lugar.</p>
         <p class="login-description">Ventas, pagos, conciliación y cierres de tus organizaciones.</p>
       </div>
@@ -61,10 +61,10 @@
           <input type="hidden" name="next" value="{{ next }}">
 
           <div class="login-field">
-            <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+            <label class="visually-hidden" for="{{ form.username.id_for_label }}">Nombre de usuario</label>
             <input type="text" name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}"
               value="{{ form.username.value|default_if_none:'' }}"
-              autocomplete="username" autocapitalize="none" spellcheck="false" required
+              placeholder="Nombre de usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required
               maxlength="{{ form.username.field.max_length }}"
               aria-describedby="login-username-help{% if form.errors %} login-error{% endif %}"
               {% if form.errors %}aria-invalid="true"{% else %}autofocus{% endif %}>
@@ -72,10 +72,10 @@
           </div>
 
           <div class="login-field">
-            <label for="{{ form.password.id_for_label }}">Contraseña</label>
+            <label class="visually-hidden" for="{{ form.password.id_for_label }}">Contraseña</label>
             <div class="login-password">
               <input type="password" name="{{ form.password.html_name }}" id="{{ form.password.id_for_label }}"
-                autocomplete="current-password" required
+                placeholder="Contraseña" autocomplete="current-password" required
                 {% if form.errors %}aria-invalid="true" aria-describedby="login-error" autofocus{% endif %}>
               <button type="button" class="login-reveal" aria-controls="{{ form.password.id_for_label }}" aria-pressed="false" hidden>Mostrar</button>
             </div>
