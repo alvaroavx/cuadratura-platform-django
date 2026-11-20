@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core import signing
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -59,7 +59,10 @@ def upload_document_pdf(request, organization_id, period, *, honorarium=False):
                 review_form.add_error(None, exc)
             else:
                 messages.success(request, f"{label.capitalize()} guardada." if created else f"La {label} ya estaba registrada.")
-                return redirect("organization-period", organization_id=org.pk, period=period)
+                destination = redirect("organization-period", organization_id=org.pk, period=period)
+                if request.headers.get("X-PDF-Review") == "1":
+                    return JsonResponse({"redirect": destination.url})
+                return destination
     elif request.method == "POST":
         upload_form = PdfUploadForm(request.POST, request.FILES)
         if upload_form.is_valid():

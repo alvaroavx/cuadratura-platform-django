@@ -71,7 +71,8 @@ def suggested_fields(pdf_text, organization_tax_id):
     kind = re.search(r"\bfactura\s+(?:(?:no\s+afecta\s+o\s+)?exenta\s+)?electronica\b", text)
     if kind:
         fields["document_type"] = 34 if "exenta" in kind.group() else 33
-        folio = re.search(r"\b(?:folio|n\s*[°ºo])\s*[:.]?\s*(\d+)\b", text[kind.end():kind.end() + 140])
+        header = "\n".join(text[kind.end():].splitlines()[:5])
+        folio = re.search(r"\b(?:folio|n[ \t]*[°ºo])[^\S\n]*[:.]?[^\S\n]*(\d+)\b", header)
         if folio:
             fields["folio"] = folio.group(1)
     ids = re.findall(rf"\br\.?\s*u\.?\s*t\.?\s*:?[^\S\n]*({RUT})\b", text)

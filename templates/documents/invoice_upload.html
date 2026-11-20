@@ -1,10 +1,13 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load static %}
 {% block title %}Cargar {{ document_label }} · Cuadratura{% endblock %}
 {% block breadcrumb %}
 <li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ organization.legal_name }} · {{ period|date:"m/Y" }}</a></li>
 <li aria-current="page">Cargar {{ document_label }}</li>
 {% endblock %}
 {% block content %}
+<div data-pdf-workspace>
+<p data-pdf-request-status role="status" hidden></p>
+<div data-pdf-stage>
 <div class="page-heading">
   <div>
     <h1>{% if review_form %}Revisar {{ document_label }}{% else %}Cargar {{ document_label }}{% endif %}</h1>
@@ -18,26 +21,41 @@
     <p>Verifica cada dato con el PDF original. Completa los campos vacíos e indica 0 donde corresponda.</p>
   {% endif %}
   {% if honorarium %}<p>Si eres el emisor se registrará como ingreso. Si eres el receptor se registrará como egreso.</p>{% endif %}
-  <form method="post" class="form-card sensitive">
+  <div class="pdf-review" data-pdf-review>
+  <form method="post" action="{% url upload_route organization.id period|date:'Y-m' %}" class="form-card pdf-review-form" data-pdf-submit>
     {% csrf_token %}
+    <input type="hidden" name="action" value="save">
     {% include "core/form_errors.html" with form=review_form %}
     {{ review_form.as_p }}
     <div class="form-actions">
-      <button class="button button-primary" name="action" value="save">Guardar {{ document_label }}</button>
+      <button type="submit" class="button button-primary">Guardar {{ document_label }}</button>
       <a class="button button-tertiary" href="{% url upload_route organization.id period|date:'Y-m' %}">Cargar otro PDF</a>
       <a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Cancelar</a>
     </div>
   </form>
+  <section class="pdf-review-preview" aria-labelledby="pdf-preview-label" hidden>
+    <div class="pdf-review-toolbar">
+      <h2 id="pdf-preview-label">PDF original</h2>
+      <a data-pdf-open target="_blank" rel="noopener">Abrir PDF en otra pestaña</a>
+    </div>
+    <div class="pdf-review-document">
+      <iframe data-pdf-frame title="Documento PDF original"></iframe>
+    </div>
+  </section>
+  </div>
 {% else %}
   <p>Sube {% if honorarium %}una boleta de honorarios electrónica{% else %}una factura electrónica afecta o exenta{% endif %} del mes. Podrás corregir los datos antes de guardar.</p>
-  <form method="post" enctype="multipart/form-data" class="form-card sensitive">
+  <form method="post" action="{% url upload_route organization.id period|date:'Y-m' %}" enctype="multipart/form-data" class="form-card" data-pdf-submit>
     {% csrf_token %}
     {% include "core/form_errors.html" with form=upload_form %}
     {{ upload_form.as_p }}
     <div class="form-actions">
-      <button class="button button-primary">Leer PDF</button>
+      <button type="submit" class="button button-primary">Leer PDF</button>
       <a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Volver al panel</a>
     </div>
   </form>
 {% endif %}
+</div>
+</div>
 {% endblock %}
+{% block scripts %}<script src="{% static 'js/pdf-review.js' %}?v=20261120-save-url" defer></script>{% endblock %}

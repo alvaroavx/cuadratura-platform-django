@@ -109,7 +109,7 @@ class AuthorizationWebTests(TestCase):
         for month in (6, 7):
             Sale.objects.create(
                 organization=self.org_a, operation_date=date(2026, month, 1), detail="Venta",
-                tax_classification="EXEMPT", net_amount=10, total_amount=10, origin_system="TEST",
+                tax_classification="EXEMPT", net_amount=10, vat_amount=0, total_amount=10, origin_system="TEST",
                 external_id=str(month), created_by=self.user,
             )
         self.client.force_login(self.user)
@@ -141,7 +141,7 @@ class AuthorizationWebTests(TestCase):
         )
         Sale.objects.create(
             organization=self.org_a, operation_date=date(1999, 12, 1), detail="Venta",
-            tax_classification="EXEMPT", net_amount=10, total_amount=10, origin_system="TEST",
+            tax_classification="EXEMPT", net_amount=10, vat_amount=0, total_amount=10, origin_system="TEST",
             external_id="1999-12", created_by=self.user,
         )
         split_response = self.client.get(

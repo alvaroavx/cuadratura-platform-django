@@ -23,6 +23,9 @@ RECIPIENT = f"77222333-{verifier_digit(77222333)}"
 INVOICE_LINES = [
     f"R.U.T.: {ISSUER}",
     "FACTURA ELECTRONICA",
+    "Actividad comercial y servicios administrativos de la empresa",
+    "Sucursal de operaciones y atención comercial para clientes",
+    "Dirección comercial registrada para la emisión de documentos",
     "Nº 42",
     "SEÑOR(ES): Cliente Ficticio SpA",
     f"RUT: {RECIPIENT}",
