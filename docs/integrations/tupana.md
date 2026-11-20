@@ -121,7 +121,7 @@ Tupana no informa nombre de fantasía (sigue siendo manual), región, tipo de en
 ### Aplicar la migración en local (cuando el usuario lo decida)
 
 ```bash
-cd avx-django-cuadratura
+cd cuadratura-platform-django
 set -a; source .env; set +a
 .venv/bin/python manage.py migrate organizations --plan   # revisar: solo 0003_taxpayer_public_data
 .venv/bin/python manage.py migrate organizations

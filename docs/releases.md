@@ -5,8 +5,8 @@ tiene servidor productivo; se publicará en el mismo Droplet que Plataforma
 Elemental (D-013 del workspace), con este esquema desde el primer día.
 
 `scripts/release/release.sh` es una **copia idéntica** del script de
-`avx-django-plataformaelemental`. El diseño completo, la recuperación y la prueba
-local están en `avx-django-plataformaelemental/docs/operacion/RELEASES.md` y en
+`plataformaelemental-platform-django`. El diseño completo, la recuperación y la prueba
+local están en `plataformaelemental-platform-django/docs/operacion/RELEASES.md` y en
 `docs/06-operacion/releases-y-recuperacion.md` del workspace. Si se cambia el
 script, copiarlo al otro repositorio.
 
