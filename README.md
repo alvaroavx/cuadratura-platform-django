@@ -55,7 +55,7 @@ La exportación es provisional. La planilla de referencia se contrastó solo en 
 
 ## Requisitos
 
-- Python 3.14 (`pyproject.toml` exige `>=3.14,<3.15`)
+- Python 3.12 a 3.14 (`pyproject.toml` exige `>=3.12,<3.15`). Producción usará 3.12, la del servidor (D-013 del workspace); verificado con la suite el 2026-11-20
 - PostgreSQL 18 (`compose.yaml` usa `postgres:18.4`)
 - Dependencias de ejecución en `requirements.txt`: Django 5.2.x, psycopg 3, openpyxl, WhiteNoise y cryptography (firma Ed25519 de la API). `ruff` y `coverage` figuran solo como extra `dev` en `pyproject.toml` y no se instalan con `requirements.txt`.
 - Poppler (`pdftotext`) para leer facturas PDF. En Debian y Ubuntu viene en `poppler-utils`.
