@@ -14,7 +14,7 @@ from organizations.models import OrganizationMembership, TaxpayerOrganization
 from organizations.rut import verifier_digit
 from reports.models import MonthlyClose
 
-from .models import TaxDocument
+from .models import HonorariumReceipt, TaxDocument
 
 PERIOD = "2026-11"
 MONTH = date(2026, 11, 1)
@@ -135,10 +135,38 @@ class InvoiceWorkflowTests(TestCase):
         self.assertTrue(response.context["review_form"].non_field_errors())
         self.assertFalse(TaxDocument.objects.exists())
 
-    def test_periodo_cerrado_bloquea_confirmacion_previa(self):
-        values = self.review()
+    def test_factura_desde_mes_cerrado_activa_mes_de_emision(self):
         MonthlyClose.objects.create(organization=self.org, period=MONTH, version=1, status=MonthlyClose.Status.CLOSED)
-        self.assertEqual(self.client.post(self.upload, values).status_code, 403)
+        origin = self.client.get(self.dashboard)
+        self.assertContains(origin, "Cargar factura PDF")
+        values = {**self.review(), "issue_date": "2025-03-19"}
+        target = reverse("organization-period", args=[self.org.pk, "2025-03"])
+        response = self.client.post(self.upload, values, headers={"X-PDF-Review": "1"})
+        self.assertEqual(response.json(), {"redirect": target})
+        self.assertEqual(TaxDocument.objects.get().tax_period, date(2025, 3, 1))
+        selection = reverse("organization-period-select", args=[self.org.pk])
+        self.assertRedirects(self.client.get(selection, {"year": "2025", "month": "3"}), target)
+
+    def test_boleta_desde_otro_mes_activa_mes_de_emision(self):
+        upload = reverse("honorarium-upload", args=[self.org.pk, PERIOD])
+        lines = [
+            "BOLETA DE HONORARIOS ELECTRONICA", "Nº 15", f"RUT: {RECIPIENT}",
+            "Fecha: 19/04/2025", f"Señor(es): Empresa ficticia  RUT: {ISSUER}",
+            "Total Honorarios: $: 100.000", "15.25 % Impto. Retenido: 15.250", "Total: 84.750",
+        ]
+        target = reverse("organization-period", args=[self.org.pk, "2025-04"])
+        self.assertRedirects(self.client.post(upload, self.review(upload, lines)), target)
+        self.assertEqual(HonorariumReceipt.objects.get().issue_date, date(2025, 4, 19))
+        selection = reverse("organization-period-select", args=[self.org.pk])
+        self.assertRedirects(self.client.get(selection, {"year": "2025", "month": "4"}), target)
+
+    def test_periodo_de_destino_cerrado_bloquea_confirmacion_previa(self):
+        values = {**self.review(), "issue_date": "2025-03-19"}
+        MonthlyClose.objects.create(
+            organization=self.org, period=date(2025, 3, 1), version=1, status=MonthlyClose.Status.CLOSED,
+        )
+        response = self.client.post(self.upload, values, headers={"X-PDF-Review": "1"})
+        self.assertContains(response, "El período de emisión 03/2025 está cerrado.")
         self.assertFalse(TaxDocument.objects.exists())
 
     def test_factura_rcv_existente_no_se_duplica(self):

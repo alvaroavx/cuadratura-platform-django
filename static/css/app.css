@@ -56,8 +56,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .context-period { padding-left: 1.25rem; border-left: 3px solid var(--action); }
 .context-change { min-height: 44px; display: inline-flex; align-items: center; }
 
-.app-shell { max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); }
-.app-shell-single { grid-template-columns: minmax(0, 1fr); max-width: 1240px; }
+.app-shell { display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+.app-shell-single { grid-template-columns: minmax(0, 1fr); }
 .sidebar { min-height: calc(100vh - 136px); padding: 1.5rem 1rem; border-right: 1px solid var(--border); background: #f1efea; }
 .local-nav { display: grid; gap: .2rem; }
 .local-nav a { min-height: 44px; padding: .65rem .75rem; border-radius: var(--radius); display: flex; align-items: center; gap: .7rem; color: #294952; text-decoration: none; font-weight: 620; }
@@ -279,7 +279,7 @@ tbody tr:hover { background: #faf9f6; }
   .tax-band div:last-child { border: 0; padding-bottom: 0; }
   .import-summary { grid-template-columns: repeat(2, 1fr); }
   .export-context { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .export-dialog { width: 100vw; height: 100vh; border: 0; border-radius: 0; }
+  .export-dialog { width: 100%; height: 100vh; border: 0; border-radius: 0; }
 }
 
 @media (max-width: 560px) {
@@ -463,19 +463,33 @@ td.amount { font-weight: 600; }
 }
 
 @media (width > 900px) {
-  .app-shell:has(.pdf-review.has-pdf-preview) {
+  .app-shell main {
+    padding-inline: 0;
+  }
+  .app-shell .form-card,
+  .app-shell .form-card > p,
+  .app-shell .danger-zone,
+  .app-shell .danger-summary {
     max-width: none;
+  }
+  .export-dialog {
+    width: 100%;
+  }
+  .app-shell:has(.pdf-review.has-pdf-preview) {
     grid-template-columns: minmax(0, 1fr);
   }
   .app-shell:has(.pdf-review.has-pdf-preview) > .sidebar {
     display: none;
-  }
-  main:has(.pdf-review.has-pdf-preview) {
-    padding-inline: 0;
   }
   main:has(.pdf-review.has-pdf-preview) > .notice,
   main:has(.pdf-review.has-pdf-preview) [data-pdf-request-status],
   main:has(.pdf-review.has-pdf-preview) [data-pdf-stage] > :not(.pdf-review) {
     margin-inline: clamp(1rem, 3vw, 2rem);
   }
+}
+
+
+@media (width > 960px) {
+  .login-message, .login-panel { max-width: none; }
+  .login-mark { width: min(38%, 8.4rem); }
 }

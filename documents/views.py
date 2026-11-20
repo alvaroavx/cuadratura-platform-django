@@ -4,7 +4,7 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core import signing
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -15,7 +15,7 @@ from .forms import HonorariumReviewForm, InvoiceReviewForm, PdfUploadForm
 from .honorarium_pdf import is_honorarium_pdf, suggested_honorarium_fields
 from .honorarium_services import save_reviewed_honorarium
 from .invoice_pdf import read_pdf, suggested_fields
-from .invoice_services import invoice_period_closed, save_reviewed_invoice
+from .invoice_services import save_reviewed_invoice
 
 PREVIEW_SALT = "documents.invoice_pdf.review"
 
@@ -34,14 +34,12 @@ def upload_document_pdf(request, organization_id, period, *, honorarium=False):
         month = date.fromisoformat(f"{period}-01")
     except ValueError as exc:
         raise Http404 from exc
-    if invoice_period_closed(org, month):
-        raise PermissionDenied("El período está cerrado.")
 
     review_form = None
     upload_form = PdfUploadForm()
     pdf_has_text = True
     scope = [str(org.pk), str(request.user.pk), month.isoformat()]
-    review_options = {"organization": org, "period": month}
+    review_options = {"organization": org}
     if request.method == "POST" and request.POST.get("action") == "save":
         review_form = review_type(request.POST, **review_options)
         if review_form.is_valid():
@@ -49,8 +47,9 @@ def upload_document_pdf(request, organization_id, period, *, honorarium=False):
                 source = signing.loads(review_form.cleaned_data["preview"], salt=salt, max_age=3600)
                 if source["scope"] != scope:
                     raise signing.BadSignature
-                _, created = save_document(
-                    organization=org, actor=request.user, period=month,
+                issue_month = review_form.cleaned_data["issue_date"].replace(day=1)
+                document, created = save_document(
+                    organization=org, actor=request.user, period=issue_month,
                     values=review_form.cleaned_data, source=source,
                 )
             except signing.BadSignature:
@@ -59,7 +58,8 @@ def upload_document_pdf(request, organization_id, period, *, honorarium=False):
                 review_form.add_error(None, exc)
             else:
                 messages.success(request, f"{label.capitalize()} guardada." if created else f"La {label} ya estaba registrada.")
-                destination = redirect("organization-period", organization_id=org.pk, period=period)
+                recorded_month = issue_month if honorarium else document.tax_period
+                destination = redirect("organization-period", organization_id=org.pk, period=recorded_month.isoformat()[:7])
                 if request.headers.get("X-PDF-Review") == "1":
                     return JsonResponse({"redirect": destination.url})
                 return destination

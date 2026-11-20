@@ -31,10 +31,9 @@ class PdfReviewForm(forms.Form):
     counterparty_name = forms.CharField(label="Razón social de la contraparte", max_length=200, required=False)
     preview = forms.CharField(widget=forms.HiddenInput)
 
-    def __init__(self, *args, organization, period, **kwargs):
+    def __init__(self, *args, organization, **kwargs):
         super().__init__(*args, **kwargs)
         self.organization = organization
-        self.period = period
 
     def clean_issuer_tax_id(self):
         return self._rut("issuer_tax_id")
@@ -57,8 +56,6 @@ class PdfReviewForm(forms.Form):
         own_recipient = same_rut_text(recipient, self.organization.tax_id)
         if own_issuer == own_recipient:
             raise forms.ValidationError("El RUT del contribuyente debe coincidir con el emisor o el receptor del documento.")
-        if values["issue_date"].replace(day=1) != self.period:
-            self.add_error("issue_date", "La fecha debe pertenecer al mes del panel. Cambia el período para cargar este documento.")
         return values
 
 

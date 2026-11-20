@@ -19,8 +19,10 @@ def invoice_period_closed(organization, period):
 
 def lock_open_organization(organization, period):
     organization = TaxpayerOrganization.objects.select_for_update().get(pk=organization.pk)
-    if not organization.is_active or organization.archived_at or invoice_period_closed(organization, period):
-        raise PermissionDenied("El contribuyente está inactivo o el período está cerrado.")
+    if not organization.is_active or organization.archived_at:
+        raise PermissionDenied("El contribuyente está inactivo o archivado.")
+    if invoice_period_closed(organization, period):
+        raise ValidationError(f"El período de emisión {period:%m/%Y} está cerrado. Reábrelo antes de registrar el documento.")
     return organization
 
 

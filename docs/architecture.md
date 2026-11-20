@@ -63,7 +63,7 @@ El receptor no ejecuta el JSON Schema; valida en código (`imports/elemental_v1.
 
 ## Carga de facturas PDF
 
-El flujo web lee hasta cinco páginas de un PDF de 5 MB con Poppler local y sugiere campos para facturas 33 y 34. El formulario permite revisar y completar la extracción. La confirmación lleva metadatos firmados con vigencia de una hora, vinculados al contribuyente, al usuario y al mes de la ruta. Los RUT determinan la dirección y el mes corresponde a la fecha de emisión. En compras, el período efectivo del RCV puede diferir.
+El flujo web lee hasta cinco páginas de un PDF de 5 MB con Poppler local y sugiere campos para facturas 33 y 34. El formulario permite revisar y completar la extracción. La confirmación lleva metadatos firmados con vigencia de una hora, vinculados al contribuyente, al usuario y al mes de la ruta. Los RUT determinan la dirección. La fecha de emisión revisada determina el mes de registro para facturas y boletas de honorarios, con independencia del mes desde el cual se inició la carga. El cierre se comprueba en el mes de destino. En compras, el período efectivo del RCV puede diferir.
 
 La confirmación reutiliza `TaxDocument` y registra un evento de auditoría. Aplica la misma clave natural del RCV, valida los componentes antes de guardar y vuelve a comprobar el cierre con bloqueo del contribuyente. El PDF se procesa temporalmente. Se conservan los datos revisados y la procedencia con formato `invoice-pdf-v1`, nombre y SHA-256. En compras, el campo de IVA de ese origen contiene el monto del PDF sin clasificación de crédito fiscal. Si una importación posterior del RCV difiere en período, clasificación u otros campos, el importador conserva el documento existente e informa el conflicto.
 

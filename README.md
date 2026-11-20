@@ -109,7 +109,7 @@ El comando solicita la nueva contraseña dos veces sin mostrarla en pantalla. No
 
 ### Facturas PDF y resumen tributario
 
-En el período del contribuyente, selecciona **Cargar factura PDF**, sube una factura afecta (33) o exenta (34) y presiona **Leer PDF**. Verifica los RUT, folio, fecha y montos antes de **Guardar factura**. Cuadratura deduce si es compra o venta a partir de los RUT revisados y detecta duplicados con el RCV. Los permisos son los mismos de importación del libro de caja.
+Desde el panel del contribuyente, selecciona **Cargar factura PDF**, sube una factura afecta (33) o exenta (34) y presiona **Leer PDF**. Verifica los RUT, folio, fecha y montos antes de **Guardar factura**. Cuadratura deduce si es compra o venta a partir de los RUT revisados y detecta duplicados con el RCV. Los permisos son los mismos de importación del libro de caja. Para facturas y boletas de honorarios nuevas, el registro queda en el mes de emisión revisado. Si ese mes está cerrado, debe reabrirse antes de guardar.
 
 La extracción funciona con PDF que contienen texto. Para escaneos sin texto, completa el formulario desde el original. La lectura es local y se conservan los datos revisados, el nombre y el hash SHA-256, sin archivar el PDF original.
 
@@ -117,7 +117,7 @@ En **Resultado documentado e impuestos** puedes ver los ingresos, compras y su d
 
 ### Boletas de honorarios PDF
 
-En el mes de emisión, selecciona **Cargar boleta de honorarios**, sube el PDF y revisa folio, fecha, RUT, bruto, retención y líquido antes de guardar. Si el contribuyente es emisor se registra un ingreso. Si es receptor se registra un egreso. Para habilitar esta función en una instalación existente, aplica las migraciones con `.venv/bin/python manage.py migrate` tras cargar `.env`.
+Desde el panel del contribuyente, selecciona **Cargar boleta de honorarios**, sube el PDF y revisa folio, fecha, RUT, bruto, retención y líquido antes de guardar. Si el contribuyente es emisor se registra un ingreso. Si es receptor se registra un egreso. Para habilitar esta función en una instalación existente, aplica las migraciones con `.venv/bin/python manage.py migrate` tras cargar `.env`.
 
 El panel distingue el bruto de ingresos y egresos, la retención de emitidas y recibidas, y el líquido de cada boleta. Los honorarios se consideran en el resultado documentado sin incorporarse al cálculo de IVA ni al estimador de PPM de primera categoría. Al igual que en las facturas, el PDF se usa para extraer los datos y no se archiva.
 

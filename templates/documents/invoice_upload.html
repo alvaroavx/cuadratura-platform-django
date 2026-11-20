@@ -44,7 +44,7 @@
   </section>
   </div>
 {% else %}
-  <p>Sube {% if honorarium %}una boleta de honorarios electrónica{% else %}una factura electrónica afecta o exenta{% endif %} del mes. Podrás corregir los datos antes de guardar.</p>
+  <p>Sube {% if honorarium %}una boleta de honorarios electrónica{% else %}una factura electrónica afecta o exenta{% endif %}. Podrás corregir los datos antes de guardar. La fecha de emisión determina el período.</p>
   <form method="post" action="{% url upload_route organization.id period|date:'Y-m' %}" enctype="multipart/form-data" class="form-card" data-pdf-submit>
     {% csrf_token %}
     {% include "core/form_errors.html" with form=upload_form %}
