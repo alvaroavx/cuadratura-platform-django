@@ -1,19 +1,48 @@
 <nav class="period-navigation" aria-label="Navegación por períodos">
+  {% if previous_period %}
   <a class="period-step period-step-previous" href="{% url 'organization-period' organization.id previous_period %}" rel="prev">
     <span class="period-step-icon" aria-hidden="true">←</span>
     <span><small>Mes anterior</small><strong>{{ previous_period_label }}</strong></span>
   </a>
-  <form method="get" action="{% url 'organization-period-select' organization.id %}" class="period-selector">
-    <label for="period-select">Período activo</label>
-    <div class="period-selector-controls">
-      <span class="period-select-wrap"><select id="period-select" name="period">
-        {% for choice in period_choices %}<option value="{{ choice.value }}"{% if choice.selected %} selected{% endif %}>{{ choice.label }}</option>{% endfor %}
-      </select></span>
-      <button type="submit">Ver</button>
-    </div>
-  </form>
+  {% endif %}
+  <details class="period-selector" data-period-picker data-active-year="{{ active_year|stringformat:'d' }}" data-active-month="{{ active_month|stringformat:'d' }}">
+    <summary>
+      <span class="period-selector-label">Período activo</span>
+      <strong class="period-selector-value">{{ active_label }}</strong>
+    </summary>
+    <form method="get" action="{% url 'organization-period-select' organization.id %}" class="period-picker-panel">
+      <div class="period-picker-year">
+        <button type="button" data-year-step="-1" aria-label="Año anterior" hidden>←</button>
+        <div>
+          <label for="period-year">Año</label>
+          <select id="period-year" name="year"{% if not activity_by_year %} disabled{% endif %}>
+            {% for year in activity_by_year %}
+              <option value="{{ year|stringformat:'d' }}"{% if year == picker_year %} selected{% endif %}>{{ year|stringformat:'d' }}</option>
+            {% empty %}
+              <option>{{ picker_year|stringformat:'d' }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="button" data-year-step="1" aria-label="Año siguiente" hidden>→</button>
+      </div>
+      {% if activity_by_year %}
+      <div class="period-picker-months" role="group" aria-label="Mes del año seleccionado">
+        {% for number, label in months %}
+        <button type="submit" name="month" value="{{ number|stringformat:'d' }}" aria-label="{{ label }}"{% if number < first_month %} class="period-month-before-history" aria-hidden="true"{% endif %}{% if number not in enabled_months %} disabled{% endif %}{% if picker_year == active_year and number == active_month %} aria-current="date"{% endif %}>
+          <span class="period-month-full">{{ label }}</span><span class="period-month-short" aria-hidden="true">{{ label|slice:":3" }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="period-picker-empty">Todavía no hay períodos con actividad.</p>
+      {% endif %}
+      {{ activity_by_year|json_script:"period-picker-activity" }}
+    </form>
+  </details>
+  {% if next_period %}
   <a class="period-step period-step-next" href="{% url 'organization-period' organization.id next_period %}" rel="next">
     <span><small>Mes siguiente</small><strong>{{ next_period_label }}</strong></span>
     <span class="period-step-icon" aria-hidden="true">→</span>
   </a>
+  {% endif %}
 </nav>

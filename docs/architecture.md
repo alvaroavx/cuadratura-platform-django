@@ -60,3 +60,15 @@ El receptor no ejecuta el JSON Schema; valida en código (`imports/elemental_v1.
 - No comprueba que `payment_date` pertenezca a `selection.period` ni que `operation_date` esté en un período abierto.
 - `pending_records` se muestran como filas `IGNORED` («Pendientes informados por Elemental») y no crean registros.
 - Idempotencia de archivo: un archivo con el mismo SHA-256 para la misma organización y período devuelve el lote existente. `batch_id` solo se conserva en `ImportBatch.source_metadata` y no participa en la idempotencia.
+
+## Carga de facturas PDF
+
+El flujo web lee hasta cinco páginas de un PDF de 5 MB con Poppler local y sugiere campos para facturas 33 y 34. El formulario permite revisar y completar la extracción. La confirmación lleva metadatos firmados con vigencia de una hora, vinculados al contribuyente, al usuario y al mes de la ruta. Los RUT determinan la dirección y el mes corresponde a la fecha de emisión. En compras, el período efectivo del RCV puede diferir.
+
+La confirmación reutiliza `TaxDocument` y registra un evento de auditoría. Aplica la misma clave natural del RCV, valida los componentes antes de guardar y vuelve a comprobar el cierre con bloqueo del contribuyente. El PDF se procesa temporalmente. Se conservan los datos revisados y la procedencia con formato `invoice-pdf-v1`, nombre y SHA-256. En compras, el campo de IVA de ese origen contiene el monto del PDF sin clasificación de crédito fiscal. Si una importación posterior del RCV difiere en período, clasificación u otros campos, el importador conserva el documento existente e informa el conflicto.
+
+## Boletas de honorarios PDF
+
+La carga reutiliza el formulario de revisión, los permisos de importación, la extracción local y la confirmación firmada de facturas. Las BHE se guardan en `HonorariumReceipt`, con integridad de bruto menos retención igual a líquido y clave única por contribuyente, emisor y folio. La copia del archivo se elimina tras la lectura. Los datos revisados, el nombre y el hash de procedencia quedan en el registro inmutable que crea la migración `documents.0004_honorarium_receipt`.
+
+El RUT del contribuyente determina si el documento es un ingreso o un egreso. La confirmación vuelve a comprobar contribuyente activo y período abierto bajo bloqueo, y audita la creación sin registrar RUT ni importes en el evento. La carga no crea cobros, pagos ni documentos en el SII.

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Cargar {{ document_label }} · Cuadratura{% endblock %}
+{% block breadcrumb %}
+<li><a href="{% url 'organization-period' organization.id period|date:'Y-m' %}">{{ organization.legal_name }} · {{ period|date:"m/Y" }}</a></li>
+<li aria-current="page">Cargar {{ document_label }}</li>
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>{% if review_form %}Revisar {{ document_label }}{% else %}Cargar {{ document_label }}{% endif %}</h1>
+    <p>{{ organization.legal_name }} · {{ period|date:"F Y" }}</p>
+  </div>
+</div>
+{% if review_form %}
+  {% if not pdf_has_text %}
+    <p class="inline-guidance" role="status">El PDF no tiene texto legible. Completa los campos usando el original.</p>
+  {% else %}
+    <p>Verifica cada dato con el PDF original. Completa los campos vacíos e indica 0 donde corresponda.</p>
+  {% endif %}
+  {% if honorarium %}<p>Si eres el emisor se registrará como ingreso. Si eres el receptor se registrará como egreso.</p>{% endif %}
+  <form method="post" class="form-card sensitive">
+    {% csrf_token %}
+    {% include "core/form_errors.html" with form=review_form %}
+    {{ review_form.as_p }}
+    <div class="form-actions">
+      <button class="button button-primary" name="action" value="save">Guardar {{ document_label }}</button>
+      <a class="button button-tertiary" href="{% url upload_route organization.id period|date:'Y-m' %}">Cargar otro PDF</a>
+      <a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Cancelar</a>
+    </div>
+  </form>
+{% else %}
+  <p>Sube {% if honorarium %}una boleta de honorarios electrónica{% else %}una factura electrónica afecta o exenta{% endif %} del mes. Podrás corregir los datos antes de guardar.</p>
+  <form method="post" enctype="multipart/form-data" class="form-card sensitive">
+    {% csrf_token %}
+    {% include "core/form_errors.html" with form=upload_form %}
+    {{ upload_form.as_p }}
+    <div class="form-actions">
+      <button class="button button-primary">Leer PDF</button>
+      <a class="button button-tertiary" href="{% url 'organization-period' organization.id period|date:'Y-m' %}">Volver al panel</a>
+    </div>
+  </form>
+{% endif %}
+{% endblock %}

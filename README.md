@@ -58,6 +58,7 @@ La exportación es provisional. La planilla de referencia se contrastó solo en 
 - Python 3.14 (`pyproject.toml` exige `>=3.14,<3.15`)
 - PostgreSQL 18 (`compose.yaml` usa `postgres:18.4`)
 - Dependencias de ejecución en `requirements.txt`: Django 5.2.x, psycopg 3, openpyxl, WhiteNoise y cryptography (firma Ed25519 de la API). `ruff` y `coverage` figuran solo como extra `dev` en `pyproject.toml` y no se instalan con `requirements.txt`.
+- Poppler (`pdftotext`) para leer facturas PDF. En Debian y Ubuntu viene en `poppler-utils`.
 - opcionalmente Docker Compose para levantar solo PostgreSQL
 
 Variables de entorno leídas por `config/settings.py`: `DJANGO_SECRET_KEY` (obligatoria fuera de DEBUG), `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_DB/USER/PASSWORD/HOST/PORT`, más las de endurecimiento HTTP, de la API (`API_*`) y de la consulta de contribuyentes por RUT (`CONTRIBUTOR_INFO_*`, `TUPANA_API_KEY`; deshabilitada por defecto, ver [ADR 0007](docs/adr/0007-consulta-contribuyentes-rut.md) y [integración Tupana](docs/integrations/tupana.md)), listadas en `.env.example` y en el [checklist de producción](docs/seguridad-produccion.md). `SII_GATEWAY` se lee en settings, pero ningún código lo consume todavía.
@@ -79,6 +80,16 @@ Si PostgreSQL ya existe, cree la base/usuario indicados en `.env` y omita Compos
 
 La primera organización, incluida Espacio Cultural y Deportivo Elementos SpA, se crea en **Nuevo contribuyente** después de iniciar sesión como `PLATFORM_ADMIN`/superusuario. No hay tenants en migraciones ni seeders.
 
+### Iniciar el servidor local
+
+Después de la instalación inicial, con PostgreSQL en marcha, copia y pega este comando en Bash desde la raíz del repositorio.
+
+```bash
+(set -a && source ./.env && set +a && .venv/bin/python manage.py runserver 127.0.0.1:8000)
+```
+
+Abre [Cuadratura en tu navegador](http://127.0.0.1:8000/). Para detener el servidor, presiona `Ctrl+C`.
+
 ### Acceso local y cambio de contraseña
 
 La pantalla `/ingresar/` usa el **nombre de usuario**, no el correo electrónico. Si el acceso falla, compruebe primero que PostgreSQL esté iniciado; en una instalación local administrada por systemd:
@@ -95,6 +106,20 @@ set -a; source .env; set +a
 ```
 
 El comando solicita la nueva contraseña dos veces sin mostrarla en pantalla. No agregue contraseñas al repositorio, archivos de documentación, logs ni fixtures.
+
+### Facturas PDF y resumen tributario
+
+En el período del contribuyente, selecciona **Cargar factura PDF**, sube una factura afecta (33) o exenta (34) y presiona **Leer PDF**. Verifica los RUT, folio, fecha y montos antes de **Guardar factura**. Cuadratura deduce si es compra o venta a partir de los RUT revisados y detecta duplicados con el RCV. Los permisos son los mismos de importación del libro de caja.
+
+La extracción funciona con PDF que contienen texto. Para escaneos sin texto, completa el formulario desde el original. La lectura es local y se conservan los datos revisados, el nombre y el hash SHA-256, sin archivar el PDF original.
+
+En **Resultado documentado e impuestos** puedes ver los ingresos, compras y su diferencia, además del IVA de ventas y compras. Ingresa la tasa PPM del mes para estimar el importe sobre los ingresos documentados sin IVA. El PPM y la retención de honorarios registrados se muestran desde el cierre vigente. El resultado cubre los documentos del período y la estimación no sustituye al F29. [Criterio del panel](docs/monthly-book.md#resultado-documentado-e-impuestos)
+
+### Boletas de honorarios PDF
+
+En el mes de emisión, selecciona **Cargar boleta de honorarios**, sube el PDF y revisa folio, fecha, RUT, bruto, retención y líquido antes de guardar. Si el contribuyente es emisor se registra un ingreso. Si es receptor se registra un egreso. Para habilitar esta función en una instalación existente, aplica las migraciones con `.venv/bin/python manage.py migrate` tras cargar `.env`.
+
+El panel distingue el bruto de ingresos y egresos, la retención de emitidas y recibidas, y el líquido de cada boleta. Los honorarios se consideran en el resultado documentado sin incorporarse al cálculo de IVA ni al estimador de PPM de primera categoría. Al igual que en las facturas, el PDF se usa para extraer los datos y no se archiva.
 
 ## Pruebas
 

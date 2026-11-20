@@ -1,0 +1,79 @@
+{% load chilean %}
+<section class="section-block" id="resumen-tributario" aria-labelledby="tax-heading">
+  <div class="section-heading">
+    <div><h2 id="tax-heading">Resultado documentado e impuestos</h2>
+    <p>El resultado considera ventas, compras y honorarios brutos documentados. Quedan fuera los gastos sin registrar y el flujo de caja.</p></div>
+  </div>
+  <div class="primary-metrics">
+    <article><span>Ventas documentadas sin IVA</span><strong>$ {{ tax.income|clp }}</strong><small>Boletas aceptadas y documentos de venta, con ajustes</small></article>
+    <article><span>Compras documentadas</span><strong>$ {{ tax.purchases|clp }}</strong><small>Incluye IVA no recuperable identificado en el RCV</small></article>
+    <article><span>Resultado documentado</span><strong>$ {{ tax.result|clp }}</strong><small>Ventas y honorarios emitidos menos compras y honorarios recibidos</small></article>
+  </div>
+  <div class="functional-panels">
+    <section class="action-panel" aria-labelledby="vat-heading">
+      <h3 id="vat-heading">IVA</h3>
+      <p>Débito por ventas <strong>$ {{ tax.sales_vat|clp }}</strong></p>
+      <p>IVA informado en compras <strong>$ {{ tax.purchase_vat|clp }}</strong></p>
+      <p>El IVA de compras incluye importes pendientes de clasificar para crédito fiscal.</p>
+    </section>
+    <section class="action-panel" aria-labelledby="ppm-heading">
+      <h3 id="ppm-heading">PPM de primera categoría</h3>
+      <form method="get" class="field" action="{% url 'organization-period' organization.id period|date:'Y-m' %}#resumen-tributario">
+        {{ ppm_form.ppm_rate.errors }}
+        {{ ppm_form.ppm_rate.label_tag }}
+        <p>{{ ppm_form.ppm_rate }}</p>
+        <button class="button button-secondary" type="submit">Estimar PPM</button>
+      </form>
+      {% if ppm_estimate != None %}<p>PPM estimado <strong>$ {{ ppm_estimate|clp }}</strong></p>{% endif %}
+      {% if close.status == 'CLOSED' %}<p>PPM registrado en el cierre <strong>$ {{ close.ppm|clp }}</strong></p>{% endif %}
+      <p>Estimación sobre ventas documentadas sin IVA, con la tasa que ingreses. Los honorarios se muestran aparte.</p>
+    </section>
+    <section class="action-panel" aria-labelledby="withholding-heading">
+      <h3 id="withholding-heading">Retención de honorarios</h3>
+      <p>En boletas recibidas <strong>$ {{ honoraria.EXPENSE.withholding|clp }}</strong></p>
+      <p>En boletas emitidas <strong>$ {{ honoraria.INCOME.withholding|clp }}</strong></p>
+      {% if close.status == 'CLOSED' %}
+        <p>Registrada en el cierre <strong>$ {{ close.second_category_withholding|clp }}</strong></p>
+      {% else %}
+        <p>Sin retención registrada en un cierre vigente.</p>
+      {% endif %}
+      <p>Los totales de boletas corresponden al mes de emisión. El cierre conserva su importe manual.</p>
+    </section>
+  </div>
+  <div class="section-heading"><div><h3>Documentos tributarios del mes</h3><p>{{ tax.count }} registrados. Se muestran hasta 20.</p></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Fecha</th><th scope="col">Tipo</th><th scope="col">Folio</th><th scope="col">Operación</th><th scope="col">Contraparte</th><th scope="col" class="amount">Total del documento</th></tr></thead>
+      <tbody>
+        {% for document in tax_documents %}
+          <tr><td>{{ document.issue_date|date:"d/m/Y" }}</td><td>{{ document.get_document_type_display }}</td><td>{{ document.folio }}</td><td>{{ document.get_direction_display }}</td><td>{{ document.counterparty_name|default:document.counterparty_tax_id }}</td><td class="amount">$ {{ document.total_amount|clp }}</td></tr>
+        {% empty %}
+          <tr><td colspan="6">Aún no hay facturas ni notas registradas en este período.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="section-heading"><div><h3>Boletas de honorarios del mes</h3><p>Se muestran hasta 20 boletas.</p></div></div>
+  <div class="tax-band">
+    <div><span>Honorarios brutos de ingresos</span><strong>$ {{ honoraria.INCOME.gross|clp }}</strong></div>
+    <div><span>Honorarios brutos de egresos</span><strong>$ {{ honoraria.EXPENSE.gross|clp }}</strong></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Fecha</th><th scope="col">Folio</th><th scope="col">Movimiento</th><th scope="col">Contraparte</th><th scope="col" class="amount">Bruto</th><th scope="col" class="amount">Retención</th><th scope="col" class="amount">Líquido</th></tr></thead>
+      <tbody>
+        {% for receipt in honorarium_receipts %}
+          <tr>
+            <td>{{ receipt.issue_date|date:"d/m/Y" }}</td><td>{{ receipt.folio }}</td><td>{{ receipt.get_direction_display }}</td>
+            <td>{% if receipt.counterparty_name %}{{ receipt.counterparty_name }}{% elif receipt.direction == "INCOME" %}{{ receipt.recipient_tax_id }}{% else %}{{ receipt.issuer_tax_id }}{% endif %}</td>
+            <td class="amount">$ {{ receipt.gross_amount|clp }}</td>
+            <td class="amount">$ {{ receipt.withholding_amount|clp }}</td>
+            <td class="amount">$ {{ receipt.liquid_amount|clp }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Aún no hay boletas de honorarios registradas en este período.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

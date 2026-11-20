@@ -1,16 +1,21 @@
 from datetime import date
+from decimal import Decimal, ROUND_HALF_UP
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
-from documents.models import ElectronicReceipt
+from documents.forms import PpmEstimateForm
+from documents.honorarium_services import monthly_honoraria
+from documents.invoice_services import monthly_tax_documents
+from documents.models import ElectronicReceipt, TaxDocument
 from organizations.access import CLOSE_ROLES, IMPORT_ROLES, READ_ROLES, WRITE_ROLES, authorized_organization
 from organizations.models import OrganizationMembership
 from reports.models import MonthlyClose
 from .forms import ManualOperationForm, ReceiptForm
 from .models import Sale
+from .periods import activity_months
 from .services import calculate_tax_preview, register_manual_operation, register_manual_receipt
 
 def _period(value):
@@ -28,14 +33,20 @@ def current_period(request,organization_id):
 def select_period(request, organization_id):
     org = authorized_organization(request.user, organization_id, roles=READ_ROLES)
     try:
-        month = _period(request.GET.get("period", ""))
-    except ValidationError:
+        if "year" in request.GET or "month" in request.GET:
+            month = date(int(request.GET.get("year", "")), int(request.GET.get("month", "")), 1)
+        else:
+            month = _period(request.GET.get("period", ""))
+    except (ValidationError, ValueError, OverflowError):
         messages.error(request, "Seleccione un período válido.")
+        return redirect("organization-period-current", organization_id=org.id)
+    if "year" in request.GET and month not in activity_months(org):
+        messages.error(request, "Ese período no tiene actividad registrada.")
         return redirect("organization-period-current", organization_id=org.id)
     return redirect(
         "organization-period",
         organization_id=org.id,
-        period=month.strftime("%Y-%m"),
+        period=month.isoformat()[:7],
     )
 
 @login_required
@@ -62,8 +73,20 @@ def period_dashboard(request,organization_id,period):
     else:
         exception_filter=""
     close=MonthlyClose.objects.filter(organization=org,period=month).order_by("-version").first()
+    tax = monthly_tax_documents(org, month)
+    receipt_net = accepted.aggregate(net=Sum("net_amount"))["net"] or 0
+    tax["income"] = tax["sales"] + receipt_net
+    tax["sales_vat"] += summary["vat"]
+    honoraria, honorarium_receipts = monthly_honoraria(org, month)
+    tax["result"] = tax["income"] - tax["purchases"] + honoraria["INCOME"]["gross"] - honoraria["EXPENSE"]["gross"]
+    ppm_form = PpmEstimateForm(request.GET if "ppm_rate" in request.GET else None)
+    ppm_estimate = None
+    if ppm_form.is_valid() and ppm_form.cleaned_data["ppm_rate"] is not None:
+        rate = ppm_form.cleaned_data["ppm_rate"]
+        ppm_estimate = (max(0, tax["income"]) * rate / 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    tax_documents = TaxDocument.objects.filter(organization=org, tax_period=month).order_by("-issue_date", "-folio")[:20]
     role=None if request.user.is_platform_admin else OrganizationMembership.objects.filter(organization=org,user=request.user,is_active=True).values_list("role",flat=True).first()
-    return render(request,"sales/dashboard.html",{"organization":org,"period":month,"sales":sales,"summary":summary,"close":close,"exception_filter":exception_filter,"exception_filter_label":exception_labels.get(exception_filter),"can_write":request.user.is_platform_admin or role in WRITE_ROLES,"can_import":request.user.is_platform_admin or role in IMPORT_ROLES,"can_close":request.user.is_platform_admin or role in CLOSE_ROLES,"can_admin":request.user.is_platform_admin or role==OrganizationMembership.Role.ORGANIZATION_ADMIN,"is_platform_admin":request.user.is_platform_admin})
+    return render(request,"sales/dashboard.html",{"organization":org,"period":month,"sales":sales,"summary":summary,"tax":tax,"tax_documents":tax_documents,"honoraria":honoraria,"honorarium_receipts":honorarium_receipts,"ppm_form":ppm_form,"ppm_estimate":ppm_estimate,"close":close,"exception_filter":exception_filter,"exception_filter_label":exception_labels.get(exception_filter),"can_write":request.user.is_platform_admin or role in WRITE_ROLES,"can_import":request.user.is_platform_admin or role in IMPORT_ROLES,"can_close":request.user.is_platform_admin or role in CLOSE_ROLES,"can_admin":request.user.is_platform_admin or role==OrganizationMembership.Role.ORGANIZATION_ADMIN,"is_platform_admin":request.user.is_platform_admin})
 
 @login_required
 @require_http_methods(["GET","POST"])

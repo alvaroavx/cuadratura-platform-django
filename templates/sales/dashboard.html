@@ -6,6 +6,8 @@
   <div><span class="eyebrow">Espacio mensual</span><h1>Resumen del período</h1><p>Ventas, documentación tributaria y pagos conocidos de {{ period|date:"F Y" }}.</p></div>
   <div class="page-actions">
     {% if can_write and close.status != 'CLOSED' %}<a class="button button-primary" href="{% url 'manual-operation' organization.id period|date:'Y-m' %}">Registrar operación</a>{% endif %}
+    {% if can_import and close.status != 'CLOSED' %}<a class="button button-secondary" href="{% url 'invoice-upload' organization.id period|date:'Y-m' %}">Cargar factura PDF</a>{% endif %}
+    {% if can_import and close.status != 'CLOSED' %}<a class="button button-secondary" href="{% url 'honorarium-upload' organization.id period|date:'Y-m' %}">Cargar boleta de honorarios</a>{% endif %}
     {% if can_import and close.status != 'CLOSED' %}<a class="button button-secondary" href="{% url 'import-create' organization.id period|date:'Y-m' %}">Importar libro de caja</a>{% endif %}
   </div>
 </div>
@@ -20,8 +22,10 @@
 <section class="tax-band" aria-label="Resumen tributario">
   <div><span>Afecto</span><strong>$ {{ summary.taxable|clp }}</strong></div>
   <div><span>Exento</span><strong>$ {{ summary.exempt|clp }}</strong></div>
-  <div><span>IVA débito</span><strong>$ {{ summary.vat|clp }}</strong></div>
+  <div><span>IVA débito de boletas</span><strong>$ {{ summary.vat|clp }}</strong></div>
 </section>
+
+{% include "documents/monthly_summary.html" %}
 
 <section class="section-block" aria-labelledby="exceptions-heading">
   <div class="section-heading"><div><h2 id="exceptions-heading">Excepciones</h2><p>Situaciones a revisar. Solo las operaciones que no están conciliadas impiden cerrar el período.</p></div></div>

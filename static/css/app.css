@@ -90,15 +90,35 @@ p { margin-top: .35rem; }
 .period-step strong { overflow: hidden; font-size: .95rem; text-overflow: ellipsis; white-space: nowrap; }
 .period-step-icon { width: 30px; height: 30px; flex: 0 0 30px; display: grid; place-items: center; color: var(--action); border: 1px solid #b7d3db; border-radius: 50%; font-size: 1.08rem; line-height: 1; }
 .period-step-next { justify-content: flex-end; text-align: right; }
-.period-selector { padding: .25rem .55rem .4rem; display: grid; align-content: center; gap: .2rem; background: #eeece6; border-radius: 5px; }
-.period-selector label { color: var(--muted); font-size: .76rem; font-weight: 720; letter-spacing: .025em; }
-.period-selector-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .45rem; }
-.period-select-wrap { position: relative; display: block; }
-.period-select-wrap::after { content: "⌄"; position: absolute; right: .8rem; top: 50%; translate: 0 -56%; color: var(--action); font-size: 1.15rem; font-weight: 800; pointer-events: none; }
-.period-selector select { width: 100%; min-height: 44px; padding: .55rem 2.2rem .55rem .75rem; appearance: none; color: var(--structural); border: 1px solid #82a0a8; border-radius: 5px; background: var(--surface); font-weight: 700; cursor: pointer; }
-.period-selector select:hover { border-color: var(--action); }
-.period-selector button { min-height: 44px; padding: .55rem .75rem; color: #fff; border: 1px solid var(--action); border-radius: 5px; background: var(--action); font-weight: 700; }
-.period-selector button:hover { background: #0f5866; }
+.period-step-previous { grid-column: 1; grid-row: 1; }
+.period-step-next { grid-column: 3; grid-row: 1; }
+.period-selector { grid-column: 2; grid-row: 1; position: relative; min-width: 0; padding: .25rem .55rem .4rem; background: #eeece6; border-radius: 5px; }
+.period-selector summary { list-style: none; display: grid; gap: .2rem; cursor: pointer; }
+.period-selector summary::-webkit-details-marker { display: none; }
+.period-selector-label, .period-picker-year label { color: var(--muted); font-size: .76rem; font-weight: 720; }
+.period-selector-value { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 44px; padding: .55rem .75rem; color: var(--structural); border: 1px solid #82a0a8; border-radius: 5px; background: var(--surface); }
+.period-selector-value::after { content: ""; width: .45rem; height: .45rem; flex: 0 0 .45rem; border: solid var(--action); border-width: 0 2px 2px 0; transform: rotate(45deg); margin: -.2rem .15rem 0 0; }
+.period-selector[open] .period-selector-value::after { transform: rotate(225deg); margin-top: .2rem; }
+.period-selector summary:hover .period-selector-value { border-color: var(--action); }
+.period-picker-panel { position: absolute; z-index: 5; top: calc(100% + .4rem); left: 50%; transform: translateX(-50%); width: min(26rem, calc(100vw - 2rem)); padding: .85rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.period-picker-year { display: flex; align-items: flex-end; justify-content: center; gap: .5rem; margin-bottom: .75rem; }
+.period-picker-year label { display: block; margin-bottom: .2rem; }
+.period-picker-year select { width: 7rem; min-height: 44px; padding: .45rem .65rem; text-align: center; font: inherit; font-weight: 700; color: var(--structural); border: 1px solid #82a0a8; border-radius: 5px; }
+.period-picker-months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; overflow: hidden; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); }
+.period-picker-panel button { padding: .4rem .25rem; color: var(--structural); background: var(--surface); border-color: var(--border); }
+.period-picker-panel button[hidden] { display: none; }
+.period-picker-year button { min-width: 44px; }
+.period-picker-panel button:hover:not(:disabled) { border-color: var(--action); }
+.period-picker-months button { width: 100%; border: 0; border-radius: 0; }
+.period-picker-months button:hover:not(:disabled) { background: #e7f0f2; }
+.period-picker-months button:focus-visible { outline-offset: -3px; }
+.period-picker-months button:disabled { color: var(--muted); background: #eeece6; cursor: default; }
+.period-picker-months button.period-month-before-history { background: var(--surface); }
+.period-month-before-history span { visibility: hidden; }
+.period-month-short { display: none; }
+.period-picker-empty { text-align: center; color: var(--muted); }
+.period-picker-months button[aria-current]:not(:disabled) { color: #fff; background: var(--action); border-color: var(--action); }
+.period-picker-year button:disabled { opacity: .45; cursor: default; }
 
 .button, button { min-height: 44px; padding: .62rem 1rem; border: 1px solid transparent; border-radius: var(--radius); display: inline-flex; align-items: center; justify-content: center; font-weight: 680; cursor: pointer; text-decoration: none; }
 .button-primary { background: var(--action); color: #fff; }
@@ -250,6 +270,8 @@ tbody tr:hover { background: #faf9f6; }
   .page-actions { justify-content: start; }
   .period-navigation { grid-column: 1 / -1; grid-row: 2; grid-template-columns: 1fr 1fr; }
   .period-selector { grid-column: 1 / -1; grid-row: 1; }
+  .period-step-previous, .period-step-next { grid-row: 2; }
+  .period-step-next { grid-column: 2; }
   .primary-metrics { grid-template-columns: 1fr; }
   .primary-metrics article { min-height: 105px; }
   .tax-band { grid-template-columns: 1fr; }
@@ -268,7 +290,12 @@ tbody tr:hover { background: #faf9f6; }
   .page-actions .button, .form-actions .button { width: 100%; }
   .period-navigation { grid-column: 1; grid-row: auto; grid-template-columns: 1fr; }
   .period-selector { grid-column: 1; }
-  .period-step-next { text-align: left; }
+  .period-step-previous, .period-step-next { grid-row: auto; }
+  .period-step-next { grid-column: 1; text-align: left; }
+  .period-picker-panel { width: min(100%, 26rem); padding: .65rem; }
+  .period-month-full { display: none; }
+  .period-month-short { display: inline; }
+  .period-picker-months button { padding-inline: .15rem; font-size: .875rem; }
   .period-step-next > span:first-child { order: 2; }
   .period-step-next .period-step-icon { order: 1; }
   th, td { min-width: 120px; white-space: normal; }

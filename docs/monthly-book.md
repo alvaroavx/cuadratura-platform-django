@@ -49,3 +49,13 @@ ante el SII y no cierra el período.
 ## Importación desde Elemental
 
 La pantalla Importación acepta JSON `elemental-cuadratura-v1` además de XLSX y CSV. Comprueba versión, UTF-8, tamaño máximo de 2 MiB, hasta 5000 operaciones, estructura, RUT destino, que `selection.period` sea el período activo, tipos, longitudes, montos, la suma de pagos por operación y `summary.total_payments`. La previsualización separa nuevas, idénticas, conflictos, errores y pendientes declarados por Elemental. La confirmación es atómica y no cierra el período. Las operaciones importadas no generan boletas, por lo que no aparecen en este libro ni en la exportación de boletas hasta que se registre una boleta manual. Detalle de validaciones y diferencias con el esquema: [arquitectura](architecture.md#qué-valida-realmente-el-receptor).
+
+## Resultado documentado e impuestos
+
+El panel del período reúne boletas aceptadas y documentos tributarios del RCV o de la carga de facturas PDF. Las notas de débito suman y las notas de crédito restan en su período registrado. El ingreso documentado suma neto afecto y exento, y las compras incluyen el IVA no recuperable identificado en el RCV. El resultado agrega los honorarios brutos emitidos y resta los honorarios brutos recibidos. Refleja los documentos disponibles del mes. Quedan fuera los cobros y pagos, los gastos sin registrar y otros ajustes contables.
+
+- **IVA** muestra el débito documentado y el IVA incluido en compras. El PDF no acredita derecho a crédito fiscal, por lo que el panel no descuenta automáticamente ese IVA del débito.
+- **PPM** estima la primera categoría aplicando la tasa indicada a las ventas documentadas sin IVA, con los honorarios por separado y redondeando a pesos. La tasa se usa para esa consulta del panel. El PPM manual del cierre se muestra por separado. [Base imponible PPM según el SII](https://www.sii.cl/preguntas_frecuentes/impuestos_mensuales/001_130_1908.htm)
+- **Retención de honorarios** muestra los importes de boletas emitidas y recibidas por separado, agrupados por fecha de emisión. El importe manual del cierre vigente se muestra aparte. El panel no determina el monto a enterar por fecha de pago ni estima PPM de segunda categoría. [Retención por honorarios según el SII](https://www.sii.cl/preguntas_frecuentes/impuestos_mensuales/001_130_5316.htm)
+
+La carga PDF no registra cobros, pagos ni boletas. El XLSX de cierre conserva su contrato de boletas y los montos manuales de PPM y retención.

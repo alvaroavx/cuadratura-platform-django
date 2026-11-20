@@ -1,7 +1,10 @@
 from datetime import date
 
-from django.db.models import Max, Min
 from django.utils.formats import date_format
+
+from documents.models import ElectronicReceipt, HonorariumReceipt, TaxDocument
+from payments.models import Payment
+from reports.models import MonthlyClose
 
 from .models import Sale
 
@@ -9,41 +12,55 @@ from .models import Sale
 def shift_month(month, offset):
     index = month.year * 12 + month.month - 1 + offset
     year, zero_based_month = divmod(index, 12)
-    return date(year, zero_based_month + 1, 1)
+    if 1 <= year <= 9999:
+        return date(year, zero_based_month + 1, 1)
+    return None
 
 
 def period_label(month):
     return date_format(month, "F Y").capitalize()
 
 
-def period_navigation_context(organization, selected):
-    current = date.today().replace(day=1)
-    bounds = Sale.objects.filter(organization=organization).aggregate(
-        first=Min("operation_date"), last=Max("operation_date")
+def activity_months(organization):
+    sources = (
+        (Sale, "operation_date"),
+        (Payment, "payment_date"),
+        (ElectronicReceipt, "tax_issue_date"),
+        (TaxDocument, "tax_period"),
+        (HonorariumReceipt, "issue_date"),
+        (MonthlyClose, "period"),
     )
-    candidates = [selected, current]
-    if bounds["first"]:
-        candidates.append(bounds["first"].replace(day=1))
-    if bounds["last"]:
-        candidates.append(bounds["last"].replace(day=1))
-    cursor, end = min(candidates), max(candidates)
-    choices = []
-    while cursor <= end:
-        choices.append(
-            {
-                "value": cursor.strftime("%Y-%m"),
-                "label": period_label(cursor),
-                "selected": cursor == selected,
-            }
-        )
-        cursor = shift_month(cursor, 1)
-    previous_month = shift_month(selected, -1)
+    first, *others = [
+        model.objects.filter(organization=organization).dates(field, "month").order_by()
+        for model, field in sources
+    ]
+    return sorted(first.union(*others))
+
+
+def period_navigation_context(organization, selected):
+    history = activity_months(organization)
+    activity_by_year = {}
+    for month in history:
+        activity_by_year.setdefault(month.year, []).append(month.month)
+    picker_year = selected.year if selected.year in activity_by_year else max(activity_by_year, default=selected.year)
+    previous_month = next((month for month in reversed(history) if month < selected), None)
     next_month = shift_month(selected, 1)
+    first_month = history[0].month if history and picker_year == history[0].year else 1
     return {
         "organization": organization,
-        "previous_period": previous_month.strftime("%Y-%m"),
-        "previous_period_label": period_label(previous_month),
-        "next_period": next_month.strftime("%Y-%m"),
-        "next_period_label": period_label(next_month),
-        "period_choices": choices,
+        "active_year": selected.year,
+        "active_month": selected.month,
+        "active_label": period_label(selected),
+        "picker_year": picker_year,
+        "activity_by_year": activity_by_year,
+        "first_month": first_month,
+        "enabled_months": activity_by_year.get(picker_year, []),
+        "previous_period": previous_month.isoformat()[:7] if previous_month else None,
+        "previous_period_label": period_label(previous_month) if previous_month else None,
+        "next_period": next_month.isoformat()[:7] if next_month else None,
+        "next_period_label": period_label(next_month) if next_month else None,
+        "months": [
+            (number, date_format(date(selected.year, number, 1), "F").capitalize())
+            for number in range(1, 13)
+        ],
     }

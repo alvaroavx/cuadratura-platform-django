@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'brand/favicon-32.png' %}">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'brand/favicon-192.png' %}">
   <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261104-login4">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261120-period-picker">
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -78,6 +78,7 @@
     markScrollableTables();
     window.addEventListener('resize', () => { clearTimeout(window.__tableTimer); window.__tableTimer = setTimeout(markScrollableTables, 150); });
   </script>
+  {% if organization and period %}<script src="{% static 'js/period-picker.js' %}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

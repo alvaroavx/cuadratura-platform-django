@@ -106,6 +106,12 @@ class AuthorizationWebTests(TestCase):
         self.assertContains(response,"Importar libro de caja")
 
     def test_period_navigation_has_previous_next_and_selector(self):
+        for month in (6, 7):
+            Sale.objects.create(
+                organization=self.org_a, operation_date=date(2026, month, 1), detail="Venta",
+                tax_classification="EXEMPT", net_amount=10, total_amount=10, origin_system="TEST",
+                external_id=str(month), created_by=self.user,
+            )
         self.client.force_login(self.user)
         response = self.client.get(reverse("organization-period", args=[self.org_a.id, "2026-07"]))
         self.assertContains(
@@ -116,8 +122,11 @@ class AuthorizationWebTests(TestCase):
             response,
             reverse("organization-period", args=[self.org_a.id, "2026-08"]),
         )
-        self.assertContains(response, 'name="period"')
-        self.assertContains(response, '<option value="2026-07" selected>Julio 2026</option>', html=True)
+        self.assertContains(response, 'name="year"')
+        self.assertContains(response, 'name="month"', count=12)
+        self.assertContains(response, 'value="5" aria-label="Mayo" class="period-month-before-history"')
+        self.assertContains(response, 'value="7" aria-label="Julio" aria-current="date"')
+        self.assertContains(response, 'value="8" aria-label="Agosto" disabled')
 
     def test_period_selector_redirects_and_preserves_tenant_authorization(self):
         self.client.force_login(self.user)
@@ -128,6 +137,29 @@ class AuthorizationWebTests(TestCase):
         self.assertRedirects(
             response,
             reverse("organization-period", args=[self.org_a.id, "2025-11"]),
+            fetch_redirect_response=False,
+        )
+        Sale.objects.create(
+            organization=self.org_a, operation_date=date(1999, 12, 1), detail="Venta",
+            tax_classification="EXEMPT", net_amount=10, total_amount=10, origin_system="TEST",
+            external_id="1999-12", created_by=self.user,
+        )
+        split_response = self.client.get(
+            reverse("organization-period-select", args=[self.org_a.id]),
+            {"year": "1999", "month": "12"},
+        )
+        self.assertRedirects(
+            split_response,
+            reverse("organization-period", args=[self.org_a.id, "1999-12"]),
+            fetch_redirect_response=False,
+        )
+        empty = self.client.get(
+            reverse("organization-period-select", args=[self.org_a.id]),
+            {"year": "1999", "month": "11"},
+        )
+        self.assertRedirects(
+            empty,
+            reverse("organization-period-current", args=[self.org_a.id]),
             fetch_redirect_response=False,
         )
         forbidden = self.client.get(
@@ -153,7 +185,7 @@ class AuthorizationWebTests(TestCase):
         response = self.client.get(reverse("import-create", args=[self.org_a.id, "2026-07"]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'class="period-navigation"')
-        self.assertContains(response, '<option value="2026-07" selected>Julio 2026</option>', html=True)
+        self.assertContains(response, '<strong class="period-selector-value">Julio 2026</strong>', html=True)
 
     def test_platform_admin_controlled_user_creation_hashes_password_and_assigns_tenant(self):
         admin=User.objects.create_user("platform",password="Admin-safe-987!",platform_role="PLATFORM_ADMIN")

@@ -96,3 +96,36 @@ class TaxDocument(models.Model):
             ),
         ]
     def __str__(self): return f"{self.get_document_type_display()} {self.folio} ({self.issuer_tax_id})"
+
+
+class HonorariumReceipt(models.Model):
+    class Direction(models.TextChoices):
+        INCOME = "INCOME", "Ingreso"
+        EXPENSE = "EXPENSE", "Egreso"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(TaxpayerOrganization, on_delete=models.PROTECT)
+    direction = models.CharField(max_length=7, choices=Direction.choices)
+    folio = models.PositiveBigIntegerField()
+    issue_date = models.DateField()
+    issuer_tax_id = models.CharField(max_length=12)
+    recipient_tax_id = models.CharField(max_length=12)
+    counterparty_name = models.CharField(max_length=200, blank=True)
+    gross_amount = models.PositiveBigIntegerField()
+    withholding_amount = models.PositiveBigIntegerField()
+    liquid_amount = models.PositiveBigIntegerField()
+    source_filename = models.CharField(max_length=255)
+    source_sha256 = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "boleta de honorarios"
+        verbose_name_plural = "boletas de honorarios"
+        indexes = [models.Index(fields=["organization", "issue_date"], name="ix_bhe_org_issue")]
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "issuer_tax_id", "folio"], name="uq_bhe_issuer_folio"),
+            models.UniqueConstraint(fields=["organization", "source_sha256"], name="uq_bhe_org_pdf"),
+            models.CheckConstraint(condition=Q(folio__gt=0, gross_amount__gt=0), name="bhe_positive_folio_and_gross"),
+            models.CheckConstraint(condition=Q(liquid_amount=F("gross_amount")-F("withholding_amount")), name="bhe_gross_less_withholding"),
+            models.CheckConstraint(condition=~Q(issuer_tax_id=F("recipient_tax_id")), name="bhe_distinct_parties"),
+        ]

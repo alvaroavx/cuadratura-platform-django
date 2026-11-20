@@ -12,6 +12,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 from audit.services import record_event
 from documents.models import ElectronicReceipt
+from organizations.models import TaxpayerOrganization
 from sales.models import Sale, SaleLine
 from .models import MonthlyClose
 
@@ -200,6 +201,7 @@ def generate_workbook(organization, period, withholding=0, ppm=0):
 
 @transaction.atomic
 def close_month(*, organization, period, actor, withholding=0, ppm=0):
+    TaxpayerOrganization.objects.select_for_update().get(pk=organization.pk)
     if MonthlyClose.objects.filter(organization=organization, period=period, status=MonthlyClose.Status.CLOSED).exists(): raise ValidationError("El período ya está cerrado.")
     content, totals, has_exceptions=generate_workbook(organization, period, withholding, ppm)
     if has_exceptions: raise ValidationError("El período contiene excepciones y no puede cerrarse.")
