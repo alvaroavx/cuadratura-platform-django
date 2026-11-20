@@ -1,0 +1,19 @@
+# Server block de Cuadratura. Dominio por definir. Los estáticos los sirve WhiteNoise.
+# El certificado se emite con certbot para el dominio real.
+server {
+    listen 80;
+    server_name cuadratura.example.cl;
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name cuadratura.example.cl;
+    client_max_body_size 5m;
+    location / {
+        proxy_pass http://127.0.0.1:8010;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

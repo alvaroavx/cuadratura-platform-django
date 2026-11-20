@@ -1,0 +1,17 @@
+# Unidad systemd para el esquema de releases (scripts/release/release.sh).
+# Puerto 8010 para no chocar con Elemental (8000) en el mismo servidor (D-013).
+[Unit]
+Description=Cuadratura (Gunicorn, releases)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/apps/cuadratura/current
+EnvironmentFile=/srv/apps/cuadratura/shared/.env.prod
+ExecStart=/srv/apps/cuadratura/current/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8010 config.wsgi:application
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

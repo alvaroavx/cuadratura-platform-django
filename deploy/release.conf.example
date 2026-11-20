@@ -1,0 +1,21 @@
+# Configuración de scripts/release/release.sh para Cuadratura.
+# En el servidor vive en /srv/apps/cuadratura/shared/release.conf (fuera de las releases).
+# No contiene secretos: las credenciales están en ENV_FILE.
+
+APP_NAME=cuadratura
+DEPLOY_ROOT=/srv/apps/cuadratura
+SERVICE=cuadratura
+ENV_FILE=/srv/apps/cuadratura/shared/.env.prod
+DJANGO_SETTINGS_MODULE=config.settings
+PYTHON_BIN=/usr/bin/python3.12
+
+# Archivos importados y documentos privados: sobreviven entre deploys.
+SHARED_LINKS="media"
+
+BACKUP_DIR=/var/backups/cuadratura
+KEEP_RELEASES=5
+KEEP_BACKUPS=20
+
+# Cuadratura no tiene endpoint de salud; la pantalla de ingreso responde 200 sin sesión.
+HEALTH_URL=http://127.0.0.1:8010/ingresar/
+HEALTH_HOST=cuadratura.example.cl

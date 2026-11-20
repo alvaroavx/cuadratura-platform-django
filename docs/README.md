@@ -7,7 +7,7 @@
 | Entender producto y reglas financieras | [README raíz](../README.md) → [arquitectura](architecture.md) → [libro mensual](monthly-book.md) |
 | Revisar aislamiento y datos sensibles | [seguridad](security.md) → ADR de `docs/adr/` |
 | Modificar importaciones | ADR-0004, `imports/`, sus parser/services/tests y el contrato de archivo privado |
-| Preparar QA o producción | [checklist de seguridad](seguridad-produccion.md), [ADR-0006](adr/0006-seguridad-api.md) |
+| Preparar QA o producción | [checklist de seguridad](seguridad-produccion.md), [ADR-0006](adr/0006-seguridad-api.md), [releases y recuperación](releases.md) |
 | Conectar un sistema por API | [guía API v1](api-v1.md), [ADR-0005](adr/0005-api-v1.md), `integrations/`, `imports/operations_v1.py`, `integrations/tests.py` |
 | Recibir datos de Plataforma Elemental por archivo | [arquitectura § Recepción Elemental v1](architecture.md#recepción-elemental-v1), [contrato y ejemplo](contracts/), `imports/elemental_v1.py`, `imports/tests/test_elemental_v1.py` |
 | Modificar cierre o exportación | [libro mensual](monthly-book.md), `reports/`, `static/js/receipt-export.js`, `audit/` y pruebas de reportes |
@@ -31,6 +31,7 @@ Monolito modular Django server-rendered con PostgreSQL. Las vistas obtienen orga
 - `ui-direction.md`: tokens y criterios visuales (coinciden con `static/css/app.css`).
 - `contracts/`: esquema JSON y ejemplo ficticio de `elemental-cuadratura-v1` (copia idéntica a la del workspace padre). El esquema genérico de la API vive en `integrations/contracts/` porque la API lo sirve.
 - `api-v1.md`: cómo dar de alta un cliente, firmar requests, enviar lotes, leer el acuse y los errores.
+- `releases.md`: deploy por releases con respaldo, rollback y restauración de base (`scripts/release/release.sh`).
 - `seguridad-produccion.md`: checklist con evidencia para QA, producción y la futura integración SII.
 - `adr/`: decisiones sobre monolito, SII, integraciones, importación versionada, seguridad de la API, eliminación de contribuyentes como archivado (ADR-0008) y documentos tributarios del RCV como registro inmutable (ADR-0009); cada ADR termina con una verificación contra el código.
 
