@@ -13,7 +13,11 @@ if not SECRET_KEY:
     if not DEBUG:
         raise RuntimeError("DJANGO_SECRET_KEY es obligatoria fuera de DEBUG.")
     SECRET_KEY = "unsafe-development-key"
-ALLOWED_HOSTS = [v.strip() for v in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if v.strip()]
+PUBLIC_HOSTS = ("apps.avx.cl", "cuadratura.avx.cl")
+configured_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
+allowed_hosts_from_env = [host.strip() for host in configured_hosts.split(",") if host.strip()]
+ALLOWED_HOSTS = list(dict.fromkeys([*allowed_hosts_from_env, *PUBLIC_HOSTS]))
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in PUBLIC_HOSTS]
 
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
