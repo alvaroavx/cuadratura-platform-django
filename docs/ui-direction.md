@@ -4,7 +4,7 @@ Identidad derivada del nombre: equilibrio, precisión, cierre y conciliación. S
 institucional sin imitar un portal estatal. Definida por la mesa BPO (artista y diseñador)
 en noviembre de 2026; el login es la iteración 1 y el interior la iteración 2.
 
-## Tokens (`static/css/app.css`, `:root`)
+## Tokens (`src/static/css/app.css`, `:root`)
 
 | Token | Valor | Uso |
 | --- | --- | --- |

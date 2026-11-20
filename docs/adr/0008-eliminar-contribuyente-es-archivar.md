@@ -14,7 +14,7 @@ El borrado físico no es posible sin romper invariantes vigentes:
   vínculos de API, perfil SII y auditoría.
 - Todo contribuyente tiene al menos un `AuditEvent` (`organization.created`). La
   auditoría es append-only: el trigger `audit_no_delete`
-  (`audit/migrations/0002_critical_append_only.py`) rechaza borrarla. Ventas, pagos,
+  (`src/audit/migrations/0002_critical_append_only.py`) rechaza borrarla. Ventas, pagos,
   boletas y cierres tienen triggers equivalentes.
 
 Un borrado real exigiría relajar la auditoría append-only y perder la trazabilidad.
@@ -34,7 +34,7 @@ No se borra ni se modifica ningún dato operativo.
 - `authorized_organization` responde 404 para un contribuyente archivado, también a
   los administradores de plataforma. Esto bloquea todas sus vistas.
 - `scoped_organizations` lo excluye de las listas.
-- La API v1 (`integrations/api.py` y `integrations/services.py`) exige además
+- La API v1 (`src/integrations/api.py` y `src/integrations/services.py`) exige además
   `archived_at IS NULL`. Es una defensa en profundidad, porque `is_active=False` ya lo
   rechazaba.
 
@@ -74,7 +74,7 @@ auditoría, así que un flujo «Recuperar» con auditoría queda como trabajo fu
 
 ## Verificación (2026-11-03)
 
-- `organizations/tests.py` (`OrganizationArchiveTests`) cubre:
+- `src/organizations/tests.py` (`OrganizationArchiveTests`) cubre:
   - el botón visible para el administrador de plataforma;
   - el rechazo a un administrador de organización;
   - un RUT incorrecto, que no archiva;

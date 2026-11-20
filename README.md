@@ -53,6 +53,15 @@ Todos auditan sus cambios.
 
 La exportación es provisional. La planilla de referencia se contrastó solo en estructura: sus columnas históricas coinciden con correlativo, operación, documento, emisor, clasificación, fecha, detalle y montos. No hay confirmación de cuál hoja constituye el mes patrón corregido por la contadora. Las planillas de trabajo se mantienen fuera de Git: `.gitignore` excluye `local/`, `docs/*.xlsx`, `docs/*.csv`, `data/*.xlsx`, `data/*.csv` y `data/*.png` (en la copia local revisada la referencia está en `data/`, no en `docs/`).
 
+## Estructura del proyecto
+
+- `src/` contiene las aplicaciones Django con sus migraciones, comandos y
+  pruebas, la configuración de Django, las plantillas y los estáticos fuente.
+- En la raíz, `manage.py` conserva los comandos de arranque y pruebas.
+  `docs/`, `deploy/` y `scripts/` contienen documentación y herramientas de operación.
+- Los datos locales y de ejecución se ubican en `data/`, `media/` y
+  `staticfiles/` en la raíz. `collectstatic` copia ahí los estáticos para servirlos.
+
 ## Requisitos
 
 - Python 3.12 a 3.14 (`pyproject.toml` exige `>=3.12,<3.15`). Producción usará 3.12, la del servidor (D-013 del workspace); verificado con la suite el 2026-11-20
@@ -61,7 +70,7 @@ La exportación es provisional. La planilla de referencia se contrastó solo en 
 - Poppler (`pdftotext`) para leer facturas PDF. En Debian y Ubuntu viene en `poppler-utils`.
 - opcionalmente Docker Compose para levantar solo PostgreSQL
 
-Variables de entorno leídas por `config/settings.py`: `DJANGO_SECRET_KEY` (obligatoria fuera de DEBUG), `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_DB/USER/PASSWORD/HOST/PORT`, más las de endurecimiento HTTP, de la API (`API_*`) y de la consulta de contribuyentes por RUT (`CONTRIBUTOR_INFO_*`, `TUPANA_API_KEY`; deshabilitada por defecto, ver [ADR 0007](docs/adr/0007-consulta-contribuyentes-rut.md) y [integración Tupana](docs/integrations/tupana.md)), listadas en `.env.example` y en el [checklist de producción](docs/seguridad-produccion.md). `SII_GATEWAY` se lee en settings, pero ningún código lo consume todavía.
+Variables de entorno leídas por `src/config/settings.py`: `DJANGO_SECRET_KEY` (obligatoria fuera de DEBUG), `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_DB/USER/PASSWORD/HOST/PORT`, más las de endurecimiento HTTP, de la API (`API_*`) y de la consulta de contribuyentes por RUT (`CONTRIBUTOR_INFO_*`, `TUPANA_API_KEY`; deshabilitada por defecto, ver [ADR 0007](docs/adr/0007-consulta-contribuyentes-rut.md) y [integración Tupana](docs/integrations/tupana.md)), listadas en `.env.example` y en el [checklist de producción](docs/seguridad-produccion.md). `SII_GATEWAY` se lee en settings, pero ningún código lo consume todavía.
 
 ## Instalación local
 
@@ -133,7 +142,10 @@ set -a; source .env; set +a
 git diff --check
 ```
 
-Estado verificado el 2026-10-12 (API v1 con seguridad ADR 0006): `check` y `makemigrations --check --dry-run` pasan, y la suite de 77 pruebas pasa completa. La prueba `test_competing_previews_confirm_only_once` se actualizó al comportamiento idempotente vigente desde `c1c7426`.
+Validación local del 2026-11-20 sobre `4393d3e`, con Python 3.14.4 y
+PostgreSQL 18.6 en un clúster desechable. Pasaron las 173 pruebas y
+`manage.py check`. `makemigrations --check --dry-run` no detectó cambios.
+La verificación de producción y PostgreSQL 16 sigue pendiente.
 
 ## Aplicaciones
 
@@ -142,9 +154,9 @@ Estado verificado el 2026-10-12 (API v1 con seguridad ADR 0006): `check` y `make
 - `sales`, `payments`, `documents`: captura, dinero, DTE 39/41 y estados. `documents.TaxDocument` guarda los documentos tributarios informados en el RCV (ADR 0009).
 - `payments`: además de `Payment`, `payments.services.register_historical_receipt_payment` vincula un pago histórico a una boleta aceptada; no tiene vista, comando ni prueba en el repositorio.
 - `reports`: exportación XLSX provisional, exportación interactiva de boletas, cierre, reapertura y vista de auditoría. El panel mensual vive en `sales`.
-- `imports`: parsers XLSX/CSV versionados, receptor JSON `elemental-cuadratura-v1` (`imports/elemental_v1.py`), lotes privados, previsualización y confirmación.
+- `imports`: parsers XLSX/CSV versionados, receptor JSON `elemental-cuadratura-v1` (`src/imports/elemental_v1.py`), lotes privados, previsualización y confirmación.
 - `sii`: contrato, adaptador deshabilitado, fake de pruebas y modelos `SiiProfile`/`SiiSubmissionAttempt` migrados pero sin uso en flujos.
 - `audit`: eventos append-only.
 - `integrations`: API HTTP v1 (`/api/v1/`), modelos `ApiClient` y `ApiClientOrganization`, contrato `cuadratura-operations-v1` y comandos de alta y rotación de token. Ver [ADR 0005](docs/adr/0005-api-v1.md) y la [guía](docs/api-v1.md).
 
-Consulte [arquitectura](docs/architecture.md), [seguridad multiempresa](docs/security.md), [criterio del libro](docs/monthly-book.md), [dirección visual](docs/ui-direction.md), [contrato Elemental v1](docs/contracts/), [API v1](docs/api-v1.md) y los ADR en `docs/adr/`.
+Consulte el [índice técnico](docs/README.md), [arquitectura](docs/architecture.md), [modelo de datos](docs/data-model.md), [guía de implementación](docs/implementation.md), [seguridad multiempresa](docs/security.md), [criterio del libro](docs/monthly-book.md), [dirección visual](docs/ui-direction.md), [contrato Elemental v1](docs/contracts/), [API v1](docs/api-v1.md) y los ADR en `docs/adr/`.

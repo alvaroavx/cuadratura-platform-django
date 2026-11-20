@@ -1,7 +1,7 @@
 # API v1 de Cuadratura — guía para conectar un sistema
 
 Decisión y razones: [ADR 0005](adr/0005-api-v1.md) y, para la seguridad, [ADR 0006](adr/0006-seguridad-api.md). Esquema del contrato:
-`integrations/contracts/cuadratura-operations-v1.schema.json`. El mismo esquema se sirve
+`src/integrations/contracts/cuadratura-operations-v1.schema.json`. El mismo esquema se sirve
 en `/api/v1/contracts/cuadratura-operations-v1.schema.json`.
 
 ## 1. Dar de alta el cliente (administrador de Cuadratura)

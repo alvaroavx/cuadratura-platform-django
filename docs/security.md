@@ -4,17 +4,42 @@
 2. `authorized_organization` exige membresía activa y rol suficiente, salvo administrador global.
 3. Cada consulta subordinada incluye `organization=org`; un UUID de venta de otro tenant responde 404.
 4. Ningún formulario operativo contiene `organization`; un campo POST inyectado se ignora.
-5. Todas las restricciones críticas de dinero y unicidad viven además en PostgreSQL.
+5. PostgreSQL impone las restricciones de montos y unicidad descritas en el [modelo de datos](data-model.md).
 6. Auditoría evita referencias de transferencia, receptor y secretos; registra identificadores técnicos y metadatos mínimos. Excepciones conocidas: `payment.historical_matched` guarda fecha y monto del pago, folio y hash de la fuente; `month.reopened` guarda el motivo escrito por la persona.
 7. El gateway deshabilitado usa un mensaje fijo y no refleja argumentos.
 
 Las pruebas cubren manipulación de URL, POST, UUID subordinado, rol de solo lectura, doble envío concurrente y ausencia de la referencia de pago en auditoría.
 
-El admin de Django (`/admin/`) registra todos los modelos y no aplica el aislamiento por organización: cualquier usuario `is_staff` con permisos de modelo ve y edita datos de todos los contribuyentes. Solo los triggers de PostgreSQL bloquean ahí eliminaciones y cambios a boletas aceptadas. `settings.py` no fija `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS ni proxy confiable; `DEBUG` es falso por defecto y `SECRET_KEY` tiene un valor inseguro de respaldo si falta la variable.
+## Sesiones, configuración y administración
 
-Antes de producción deben completarse los puntos del [checklist de seguridad](seguridad-produccion.md). La configuración ya exige `SECRET_KEY` fuera de DEBUG y usa cookies `Secure`; falta TLS, proxy confiable, backup/restauración ensayada, retención de archivos, monitoreo, política de sesión, antivirus de cargas y revisión de dependencias.
+La interfaz operativa exige sesión Django y sus formularios usan CSRF. El rol
+global admite acceso transversal. El contribuyente archivado queda fuera
+de las rutas operativas y la API requiere además que esté activo.
+[Permisos de la aplicación](../src/organizations/access.py)
+
+El admin de Django permite acceso transversal a los modelos según los permisos
+de cada usuario activo con `is_staff`. Las escrituras pasan por el ORM del
+admin y las restricciones de PostgreSQL. Las reglas de las vistas y los
+servicios financieros tienen otro punto de entrada.
+[Restricciones de datos](data-model.md#cuándo-interviene-postgresql)
+
+`DEBUG` es falso por defecto y fuera de DEBUG se exige `DJANGO_SECRET_KEY`.
+Las cookies de sesión y CSRF usan `Secure` por defecto fuera de DEBUG. La
+sesión es `HttpOnly` y `SameSite=Lax`. Se aplica `X-Frame-Options: DENY` y
+`Referrer-Policy: same-origin`. La redirección HTTPS, HSTS y la confianza en
+`X-Forwarded-Proto` son parámetros del entorno. La configuración del proxy
+y las garantías del servidor se verifican con el [checklist de producción](seguridad-produccion.md).
+[Configuración Django](../src/config/settings.py)
+
+## Archivos e importaciones
 
 Las importaciones limitan el tamaño y la cantidad de filas: CSV hasta 2 MiB y 500 filas totales del archivo (incluidos metadatos, cabecera y totales); XLSX hasta 10 MiB, 500 operaciones en la hoja del período y 5000 filas técnicas bajo la cabecera; JSON Elemental hasta 2 MiB y 5000 operaciones. Validan extensión (`.csv`, `.xlsx`, `.json`), estructura, organización, período, clasificación y montos; el CSV además exige UTF-8 (con o sin BOM), rechaza bytes nulos y detecta `,` o `;`. Django además limita el cuerpo no-archivo a 3 MiB y guarda en memoria cargas de hasta 2 MiB. El archivo original queda bajo `media/private/imports` sin ruta web pública. Los lotes se identifican por SHA-256 dentro de cada organización y período, y no se registra contenido personal en logs. PostgreSQL impide eliminar lotes confirmados y sus filas; las actualizaciones no están bloqueadas por trigger. Las filas guardan en `ImportRow.original_data`/`normalized_data` el contenido del archivo, incluidos detalle, montos y, en Elemental, nombre visible del beneficiario y referencias de pago. Los textos con prefijos `=`, `+`, `-` o `@` se conservan como dato original, pero se neutralizan antes de exportarlos a XLSX.
+
+La revisión de PDF usa permisos de importación y procesa el archivo localmente.
+La confirmación valida metadatos firmados ligados al contribuyente, la cuenta
+y el mes de la ruta. Su vigencia es de una hora. El PDF original se procesa
+temporalmente y se conservan campos revisados, nombre y SHA-256.
+[Vistas de carga](../src/documents/views.py)
 
 Nunca se deben guardar certificado, contraseña, CAF, llave privada o llave maestra en Git, logs o texto plano. La futura llave maestra vivirá en un secret manager/HSM fuera de PostgreSQL.
 

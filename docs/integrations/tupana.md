@@ -40,7 +40,7 @@ Authorization: Api-Key <TUPANA_API_KEY>
 Accept: application/json
 ```
 
-Implementación: `organizations/contributor_info.py`, `TupanaContributorInformationProvider`.
+Implementación: `src/organizations/contributor_info.py`, `TupanaContributorInformationProvider`.
 - Usa `urllib` sin redirecciones, con timeout y una respuesta de hasta 1 MiB.
 - No hace reintentos.
 - La key viaja solo en la cabecera: nunca en la URL, el navegador ni los logs.
@@ -133,7 +133,7 @@ set -a; source .env; set +a
 
 ## Pruebas
 
-- **Automáticas:** `organizations/test_contributor_lookup.py` usa un `FakeOpener` y fixtures ficticias con la forma real, incluido el 200 vacío y el 403 anidado. No dependen de la red ni de la key.
+- **Automáticas:** `src/organizations/test_contributor_lookup.py` usa un `FakeOpener` y fixtures ficticias con la forma real, incluido el 200 vacío y el 403 anidado. No dependen de la red ni de la key.
 - **Manuales:** con `CONTRIBUTOR_INFO_PROVIDER=tupana`, consultar un RUT de empresa pública en «Nuevo contribuyente» y luego usar «Actualizar desde Tupana» en la ficha. No guardar respuestas crudas en el repositorio.
 
 ## Limitaciones conocidas

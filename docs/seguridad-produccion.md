@@ -15,13 +15,13 @@ captura, acta), no con una declaración. Las etiquetas significan lo siguiente:
 
 | Control | Dónde | Estado |
 |---|---|---|
-| Token Bearer de 256 bits, solo SHA-256 en BD, con vencimiento y rotación con solapamiento | `integrations/services.py` | Implementado |
-| Firma Ed25519 por request, anti-replay y evidencia de origen en el lote | `integrations/security.py` | Implementado |
+| Token Bearer de 256 bits, solo SHA-256 en BD, con vencimiento y rotación con solapamiento | `src/integrations/services.py` | Implementado |
+| Firma Ed25519 por request, anti-replay y evidencia de origen en el lote | `src/integrations/security.py` | Implementado |
 | Registro de intentos fallidos (sin secretos) y bloqueo por IP | `ApiAccessFailure` | Implementado |
 | Límite de frecuencia por cliente, compartido entre procesos | `ApiRateCounter` | Implementado |
 | HTTPS obligatorio en la API fuera de DEBUG | `API_REQUIRE_HTTPS` | Implementado |
-| `SECRET_KEY` obligatoria, cookies `Secure`, HSTS y `LOGGING` | `config/settings.py` | Implementado; HSTS por configurar |
-| La API solo crea lotes en revisión; confirma una persona | `imports/services.py` | Implementado |
+| `SECRET_KEY` obligatoria, cookies `Secure`, HSTS y `LOGGING` | `src/config/settings.py` | Implementado; HSTS por configurar |
+| La API solo crea lotes en revisión; confirma una persona | `src/imports/services.py` | Implementado |
 | Alta, rotación, llave y vínculos auditados; admin solo desactiva | comandos de `integrations` | Implementado |
 
 ## 1. Antes de QA (bloqueante)

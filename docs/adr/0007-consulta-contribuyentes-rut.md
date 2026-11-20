@@ -11,7 +11,7 @@ Crear o corregir un contribuyente (`TaxpayerOrganization`, que en Cuadratura es 
 
 ## Decisión
 
-- **Adaptador** `organizations/contributor_info.py`: protocolo `ContributorInformationProvider.lookup(rut) -> LookupResult` con estados `found`, `not_found`, `unavailable`, `provider_limited` y `disabled`, y un `ContributorInfo` normalizado. Incluye `EconomicActivity` y `RegisteredAddress` como colecciones y no depende del JSON del proveedor. Implementaciones: `TupanaContributorInformationProvider`, `DisabledContributorInformationProvider` (por defecto) y `FakeContributorInformationProvider` (pruebas). Sigue el patrón de `sii/gateway.py`.
+- **Adaptador** `src/organizations/contributor_info.py`: protocolo `ContributorInformationProvider.lookup(rut) -> LookupResult` con estados `found`, `not_found`, `unavailable`, `provider_limited` y `disabled`, y un `ContributorInfo` normalizado. Incluye `EconomicActivity` y `RegisteredAddress` como colecciones y no depende del JSON del proveedor. Implementaciones: `TupanaContributorInformationProvider`, `DisabledContributorInformationProvider` (por defecto) y `FakeContributorInformationProvider` (pruebas). Sigue el patrón de `src/sii/gateway.py`.
 - **Proveedor Tupana:** `GET https://api.tupana.ai/v2/master-entities/?rut=NNNNNNNN-D` con `Authorization: Api-Key …`. URL fija en código, sin redirecciones, timeout configurable, respuesta de hasta 256 KiB y sin reintentos. Usa `urllib` de la biblioteca estándar: no hay dependencias nuevas y no se usa el SDK oficial. Detalle en [integración Tupana](../integrations/tupana.md).
 - **Creación:** `POST /organizaciones/consultar-rut/` (`organization-tax-id-lookup`). Exige sesión, administrador de plataforma (el único que crea contribuyentes) y CSRF, y valida el RUT por módulo 11 antes de llamar al proveedor. Aplica un límite por usuario y minuto y no escribe en la base. Si el RUT ya existe no consulta al proveedor y entrega el enlace a la ficha si no está archivada. «Usar estos datos» copia los valores no vacíos al formulario y el guardado sigue el POST normal.
 - **Edición («Actualizar desde Tupana»):**
@@ -49,7 +49,7 @@ Detalle completo en [integración Tupana](../integrations/tupana.md). En resumen
   - campos: organización, `street`, `district` (comuna), `city`, `sii_branch_code`, `phone`, `is_main_in_sii`, `source`, `external_reference` (`addr_…`), `last_reported_at` y `not_reported_since`;
   - única por organización y referencia cuando hay referencia.
   - Sin referencia, se compara por calle y comuna normalizadas.
-- **Reglas** (`organizations/public_data.py`):
+- **Reglas** (`src/organizations/public_data.py`):
   - solo se agrega o actualiza lo seleccionado;
   - un vacío de la fuente no borra;
   - nada se elimina;
@@ -103,7 +103,7 @@ Si falta la key, el proveedor queda deshabilitado y los botones no aparecen.
 
 ## Verificación contra el código
 
-`organizations/test_contributor_lookup.py` cubre:
+`src/organizations/test_contributor_lookup.py` cubre:
 - validación del RUT;
 - contrato de Tupana con mocks basados en la OpenAPI: éxito, incompleto, inexistente, 401/403, 429, 5xx, timeout, esquema inesperado, otro RUT y logs sin secretos;
 - colecciones: creación con lo aceptado, comparación (nuevo, diferente, sin cambios, no informado), selección individual, preservación y nada eliminado;

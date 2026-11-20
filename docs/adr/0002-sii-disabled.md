@@ -26,7 +26,7 @@ Estado: aceptado.
 
 ## Verificación contra el código (2026-10-12)
 
-- Implementado: `sii/gateway.py` define `SiiGateway`, `DisabledSiiGateway` (mensaje fijo, no refleja argumentos) y `FakeSiiGateway`; `SiiProfile.productive_issuance_enabled` es `editable=False` con valor por defecto falso.
+- Implementado: `src/sii/gateway.py` define `SiiGateway`, `DisabledSiiGateway` (mensaje fijo, no refleja argumentos) y `FakeSiiGateway`; `SiiProfile.productive_issuance_enabled` es `editable=False` con valor por defecto falso.
 - Existen y están migrados `SiiProfile` (ambientes `DISABLED`/`CERTIFICATION`) y `SiiSubmissionAttempt`, registrados en el admin de Django, pero ningún flujo los usa.
 - Ningún código de aplicación invoca un gateway SII. La restricción «único adaptador fuera de pruebas» se cumple por ausencia de uso, no por una fábrica que lea `settings.SII_GATEWAY`; esa variable se define pero no se consume.
 - El checklist anterior sigue **planificado / no implementado** en su totalidad.

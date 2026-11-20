@@ -31,7 +31,7 @@ la tabla.
 El filtro se aplica sobre las boletas aceptadas: `pending` deja las aceptadas
 cuya venta no está `DOCUMENTED` e `historical_incomplete` las de ventas
 `MISSING_PAYMENT_DATA`. Como la base son solo boletas aceptadas, `rejected` y
-`uncertain` siempre devuelven cero filas (`reports/services.py`,
+`uncertain` siempre devuelven cero filas (`src/reports/services.py`,
 `receipt_export_queryset`).
 
 Esta exportación contiene una fila por `ElectronicReceipt` aceptada, ordenada por

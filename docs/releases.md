@@ -24,6 +24,15 @@ script, copiarlo al otro repositorio.
 | Salud | `/ingresar/` (no hay endpoint de salud) |
 | Python | 3.12 en el servidor (`pyproject.toml` acepta 3.12 a 3.14) |
 
+## Arranque con la estructura src
+
+La unidad systemd incorpora `current/src` al path de Gunicorn y ejecuta
+`config.wsgi:application` desde `current`. Si una instalación de prueba usaba
+la unidad anterior, actualiza la unidad con el ejemplo versionado y vuelve a
+cargarla en systemd. El script de release sigue invocando `manage.py` desde
+la raíz de cada release. `collectstatic` escribe en `staticfiles/` de la
+release y `media/` sigue siendo un enlace al directorio compartido.
+
 ## Antes del primer deploy
 
 - **Agregar `gunicorn` a `requirements.txt`.** Hoy no está y el hook lo bloquea.

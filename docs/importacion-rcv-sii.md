@@ -130,9 +130,9 @@ El listado muestra RUT, folio, fecha y total, pero no razones sociales.
 
 ## Cómo agregar un nuevo formato o tipo
 
-1. Agregar un `RcvFormat` en `documents/rcv.py` con patrón de nombre y encabezado exactos, y decidir qué columnas se persisten y cuáles deben venir vacías.
-2. Si se necesitan campos nuevos, migración aditiva en `documents` y ajuste de `COMPARED_FIELDS` en `documents/rcv_import.py` y del trigger si cambia la regla de inmutabilidad.
-3. Pruebas con datos ficticios en `documents/test_rcv.py`. Nunca usar archivos reales como fixtures.
+1. Agregar un `RcvFormat` en `src/documents/rcv.py` con patrón de nombre y encabezado exactos, y decidir qué columnas se persisten y cuáles deben venir vacías.
+2. Si se necesitan campos nuevos, migración aditiva en `documents` y ajuste de `COMPARED_FIELDS` en `src/documents/rcv_import.py` y del trigger si cambia la regla de inmutabilidad.
+3. Pruebas con datos ficticios en `src/documents/test_rcv.py`. Nunca usar archivos reales como fixtures.
 4. Actualizar este documento y el ADR 0009.
 
 La lógica vive en funciones reutilizables (`build_plan`, `apply_plan`, `economic_summary`), así que una futura carga desde la web o una conexión con el SII puede usarlas sin duplicar validación. Eso no está desarrollado.

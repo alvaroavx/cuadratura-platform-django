@@ -27,7 +27,7 @@ No se persisten `Nro` (es un correlativo del listado, no un identificador), acus
 
 **2. Componentes tributarios no modelados se rechazan, no se aplanan.** Si una fila trae valor en IVA retenido, activo fijo, impuesto sin derecho a crédito, tabacos, otros impuestos, comisiones de liquidación, zona franca, envases, pasajes u otra columna tributaria sin campo propio, la fila es inválida y el archivo completo queda bloqueado. Lo mismo ocurre con un documento con «Fecha Reclamo». Se valida `exento + neto + IVA (+ no recuperable + uso común) = total`. Una factura 34 no puede traer neto ni IVA. PostgreSQL repite estas reglas con `CHECK`.
 
-**3. Contraparte sin modelo propio.** Se guarda RUT normalizado (`12345678-9`, módulo 11 de `organizations/rut.py`) y razón social informada en cada documento. No se crea `TaxpayerOrganization` (sería un tenant) ni se enlaza por FK a otro tenant (cruzaría el aislamiento por organización sin aportar permisos ni datos). Como el RUT está normalizado, una futura tabla de contrapartes por organización puede poblarse desde los documentos existentes sin perder información.
+**3. Contraparte sin modelo propio.** Se guarda RUT normalizado (`12345678-9`, módulo 11 de `src/organizations/rut.py`) y razón social informada en cada documento. No se crea `TaxpayerOrganization` (sería un tenant) ni se enlaza por FK a otro tenant (cruzaría el aislamiento por organización sin aportar permisos ni datos). Como el RUT está normalizado, una futura tabla de contrapartes por organización puede poblarse desde los documentos existentes sin perder información.
 
 **4. Clave natural:** única por `(organization, direction, document_type, issuer_tax_id, folio)`. En ventas el emisor es el contribuyente; en compras, el proveedor. No se usan `Nro` ni montos. Un documento existente idéntico es no-op; si difiere en cualquier campo persistido se informa como conflicto y se conserva lo registrado. No hay política de reemplazo.
 
@@ -54,7 +54,7 @@ No se persisten `Nro` (es un correlativo del listado, no un identificador), acus
 
 ## Verificación (2026-11-04)
 
-- `documents/test_rcv.py`: 27 pruebas con datos ficticios (parser, idempotencia, conflictos, NC pendiente y resuelta después, conciliación, bloqueo por organización o período, rollback, trigger y concurrencia con dos hilos).
+- `src/documents/test_rcv.py`: 27 pruebas con datos ficticios (parser, idempotencia, conflictos, NC pendiente y resuelta después, conciliación, bloqueo por organización o período, rollback, trigger y concurrencia con dos hilos).
 - Simulación con los CSV reales de `data/` contra la base local sin migrar: el contribuyente existe y coincide, se reconocen los 5 documentos, los dos resúmenes cuadran y la NC se vincula con la factura que referencia.
 - Importación de ensayo con `--apply` en un clúster PostgreSQL desechable: 5 creados, NC vinculada; la segunda ejecución no crea nada.
 - No verificado: importación en la base local del usuario, QA o producción. Tampoco la semántica de «IVA uso Comun» ni de los indicadores ignorados con un contador; no hay casos en los archivos reales.

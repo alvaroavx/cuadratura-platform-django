@@ -92,7 +92,7 @@ mTLS y la lista de IP permitidas quedan como **requisito de producción** en el
 
 ## Verificación (2026-10-12)
 
-- `integrations/tests.py` (`ApiV1SecurityTests`) cubre:
+- `src/integrations/tests.py` (`ApiV1SecurityTests`) cubre:
   - la firma como segundo factor, el replay y la evidencia guardada;
   - un cliente sin llave;
   - el registro de fallos sin secretos y el bloqueo por IP;
