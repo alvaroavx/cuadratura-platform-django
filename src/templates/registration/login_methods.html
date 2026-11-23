@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Métodos de acceso · Cuadratura{% endblock %}
+{% block breadcrumb %}<li aria-current="page">Métodos de acceso</li>{% endblock %}
+{% block content %}
+  <h1>Métodos de acceso</h1>
+  {% for provider, name, linked in providers %}
+    <section class="panel">
+      <h2>{{ name }}</h2>
+      {% if linked %}
+        <p>Cuenta vinculada.</p>
+      {% else %}
+        <p>Confirma tu contraseña de Cuadratura y elige la cuenta de {{ name }} que usarás para ingresar.</p>
+      {% endif %}
+      {% if user.has_usable_password %}
+        <form method="post" action="{% url 'update-login-method' provider %}">
+          {% csrf_token %}
+          <p>
+            <label for="password-{{ provider }}">Contraseña de Cuadratura</label>
+            <input type="password" name="password" id="password-{{ provider }}" autocomplete="current-password" required>
+          </p>
+          {% if linked %}
+            <button class="button button-secondary" type="submit" name="action" value="disconnect">Desvincular {{ name }}</button>
+          {% else %}
+            <button class="button button-primary" type="submit" name="action" value="connect">Vincular {{ name }}</button>
+          {% endif %}
+        </form>
+      {% else %}
+        <p>Para cambiar este vínculo, solicita una contraseña local al administrador de Cuadratura.</p>
+      {% endif %}
+    </section>
+  {% empty %}
+    <p>El ingreso con proveedores externos está deshabilitado.</p>
+  {% endfor %}
+{% endblock %}

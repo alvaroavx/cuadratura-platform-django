@@ -49,6 +49,10 @@
         <img class="login-mark" src="{% static 'brand/cuadratura-mark-tight.png' %}" alt="" width="332" height="474">
         <h1>Ingresar</h1>
 
+        {% for message in messages %}
+          <div class="notice notice-{{ message.tags|default:'info' }}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">{{ message }}</div>
+        {% endfor %}
+
         {% if form.errors %}
           <div class="login-error" role="alert" id="login-error">
             {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
@@ -83,6 +87,13 @@
 
           <button class="button button-primary login-submit" type="submit">Ingresar</button>
         </form>
+        {% for provider, name in federated_providers.items %}
+          <form method="post" action="{% url 'federated-login' provider %}" class="login-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <button class="button button-secondary login-submit" type="submit">Ingresar con {{ name }}</button>
+          </form>
+        {% endfor %}
       </div>
     </main>
   </div>

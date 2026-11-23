@@ -27,4 +27,4 @@ Lee `README.md`, `docs/README.md`, `docs/architecture.md`, `docs/security.md`, `
 
 ## Validación y seguridad
 
-Las pruebas requieren PostgreSQL y un rol con `CREATEDB`, o un clúster desechable. Ejecuta los comandos de `README.md`, que también registra la última validación local; revisa aislamiento multiempresa, idempotencia, auditoría e importaciones. Nunca agregues secretos, CAF, certificados o llaves privadas al repositorio, logs o fixtures.
+Valida en la base PostgreSQL local configurada y conserva los datos de prueba. En desarrollo local evita el runner de Django, que crea una base `test_*`. Ejecuta las comprobaciones de `README.md` y revisa aislamiento multiempresa, idempotencia, auditoría e importaciones según el cambio. Nunca agregues secretos, CAF, certificados o llaves privadas al repositorio, logs o fixtures.

@@ -8,6 +8,7 @@
 | Ubicar carpetas, puntos de entrada y clases | [guía de implementación](implementation.md) |
 | Entender relaciones, claves y triggers | [modelo de datos](data-model.md) |
 | Revisar aislamiento y datos sensibles | [seguridad](security.md) → ADR de `docs/adr/` |
+| Configurar ingreso con Google | [ADR 0010 y configuración](adr/0010-acceso-federado.md), `src/accounts/federation.py` |
 | Modificar importaciones | ADR-0004, `src/imports/`, sus parser/services/tests y el contrato de archivo privado |
 | Preparar QA o producción | [checklist de seguridad](seguridad-produccion.md), [ADR-0006](adr/0006-seguridad-api.md), [releases y recuperación](releases.md) |
 | Conectar un sistema por API | [guía API v1](api-v1.md), [ADR-0005](adr/0005-api-v1.md), `src/integrations/`, `src/imports/operations_v1.py`, `src/integrations/tests.py` |

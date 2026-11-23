@@ -116,6 +116,13 @@ set -a; source .env; set +a
 
 El comando solicita la nueva contraseña dos veces sin mostrarla en pantalla. No agregue contraseñas al repositorio, archivos de documentación, logs ni fixtures.
 
+### Ingresar con Google
+
+Cuando Google esté habilitado, entra primero con tu usuario y contraseña de
+Cuadratura. Abre **Métodos de acceso**, confirma tu contraseña y elige tu cuenta
+Google. Después puedes usar **Ingresar con Google**. La misma pantalla permite
+desvincular la cuenta. Consulta la [configuración de OAuth](docs/adr/0010-acceso-federado.md).
+
 ### Facturas PDF y resumen tributario
 
 Desde el panel del contribuyente, selecciona **Cargar factura PDF**, sube una factura afecta (33) o exenta (34) y presiona **Leer PDF**. Verifica los RUT, folio, fecha y montos antes de **Guardar factura**. Cuadratura deduce si es compra o venta a partir de los RUT revisados y detecta duplicados con el RCV. Los permisos son los mismos de importación del libro de caja. Para facturas y boletas de honorarios nuevas, el registro queda en el mes de emisión revisado. Si ese mes está cerrado, debe reabrirse antes de guardar.
@@ -132,11 +139,12 @@ El panel distingue el bruto de ingresos y egresos, la retención de emitidas y r
 
 ## Pruebas
 
-Las pruebas requieren PostgreSQL real; SQLite no es compatible ni está configurado. `manage.py test` crea una base `test_<POSTGRES_DB>`, por lo que el usuario de `.env` necesita permiso `CREATEDB`; si no lo tiene, use un clúster PostgreSQL 18 desechable y apunte `POSTGRES_HOST/PORT/USER` a él:
+Para validar cambios en desarrollo, usa la base PostgreSQL local configurada en
+`.env` y conserva los datos de prueba. El runner de Django crea una base
+`test_*`, así que reserva la suite automatizada para CI.
 
 ```bash
 set -a; source .env; set +a
-.venv/bin/python manage.py test -v 2
 .venv/bin/python manage.py check
 .venv/bin/python manage.py makemigrations --check --dry-run
 git diff --check

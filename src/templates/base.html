@@ -20,6 +20,7 @@
     {% if user.is_authenticated %}
       <div class="user-menu">
         <span class="user-copy"><strong>{{ user.get_full_name|default:user.username }}</strong><small>{% if access.role %}{{ access.role }}{% elif user.is_platform_admin %}Administrador de plataforma{% else %}Usuario{% endif %}</small></span>
+        <a class="button button-tertiary button-on-dark" href="{% url 'login-methods' %}">Métodos de acceso</a>
         <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button class="button button-tertiary button-on-dark" type="submit">Salir</button></form>
       </div>
     {% endif %}

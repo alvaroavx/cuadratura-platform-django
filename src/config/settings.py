@@ -23,6 +23,8 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in PUBLIC_HOSTS]
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
+    "allauth", "allauth.account", "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "accounts", "organizations", "sales", "payments", "documents", "reports",
     "sii", "integrations", "imports", "audit",
 ]
@@ -30,6 +32,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware", "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware", "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware", "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware", "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
@@ -110,4 +113,33 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "plain"}},
     "root": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO")},
     "loggers": {"cuadratura.api.security": {"level": "INFO", "propagate": True}},
+}
+
+
+# Identidades de acceso externas (ADR 0010).
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_ADAPTER = "accounts.federation.FederatedAccountAdapter"
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
+SOCIALACCOUNT_STORE_TOKENS = False
+SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_REQUESTS_TIMEOUT = 8
+
+_google_client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+_google_client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
+FEDERATED_LOGIN_PROVIDERS = {}
+if env_bool("GOOGLE_AUTH_ENABLED", False) and _google_client_id and _google_client_secret:
+    FEDERATED_LOGIN_PROVIDERS["google"] = "Google"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["openid", "email"],
+        "AUTH_PARAMS": {"access_type": "online", "prompt": "select_account"},
+        "OAUTH_PKCE_ENABLED": True,
+        "APPS": (
+            [{"client_id": _google_client_id, "secret": _google_client_secret}]
+            if "google" in FEDERATED_LOGIN_PROVIDERS else []
+        ),
+    },
 }
